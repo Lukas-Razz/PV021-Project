@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.pov021.neuralnets.demo;
+package cz.pv021.neuralnets.demo;
 
 import cz.pv021.neuralnets.layers.*;
 import cz.pv021.neuralnets.functions.*;
