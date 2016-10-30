@@ -6,6 +6,7 @@
 package cz.pv021.neuralnets.layers;
 
 import cz.pv021.neuralnets.functions.ActivationFunction;
+import java.util.Random;
 
 /**
  *
@@ -23,9 +24,10 @@ public class FullyConnectedLayer implements ILayer
     
     private ActivationFunction activationFunction;
     
-    public FullyConnectedLayer(int numberOfUnits) {
+    public FullyConnectedLayer(int numberOfUnits, ActivationFunction activationFunction) {
         this.numberOfUnits = numberOfUnits;
         output = new double[numberOfUnits];
+        this.activationFunction = activationFunction;
     }
 
     @Override
@@ -66,5 +68,17 @@ public class FullyConnectedLayer implements ILayer
     @Override
     public double[] GetOutput() {
         return output;
+    }
+
+    @Override
+    public void initializeWeights(long seed) {
+        Random r = new Random(seed);
+        for(int i=0; i<weights.length; i++)
+        {
+            for(int j=0; j<weights[i].length; j++)
+            {
+                weights[i][j] = r.nextGaussian();
+            }
+        }
     }
 }

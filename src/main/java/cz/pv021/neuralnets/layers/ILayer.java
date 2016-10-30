@@ -22,4 +22,6 @@ public interface ILayer
     
     int GetNumberOfUnits();
     double[] GetOutput();
+    
+    void initializeWeights(long seed);
 }

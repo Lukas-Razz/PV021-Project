@@ -40,5 +40,10 @@ public class FullyConnecedRecursiveLayer implements ILayer {
     public double[] GetOutput() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void initializeWeights(long seed) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

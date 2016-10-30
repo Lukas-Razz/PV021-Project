@@ -13,7 +13,7 @@ public class HyperbolicTangent extends ActivationFunction {
 
     @Override
     public double Function(double innerPotencial) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return Math.tanh(innerPotencial);
     }
 
     @Override
