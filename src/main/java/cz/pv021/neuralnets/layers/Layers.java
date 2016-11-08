@@ -1,21 +1,21 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.pv021.neuralnets.layers;
 
 /**
- *
- * @author lukas
+ * Podpůrná třída s pomocnými metodami pro lepší práci s vrstvami.
+ * 
+ * @author  Lukáš Daubner
+ * @since   2016-10-30
+ * @version 2016-11-07
  */
-public class Layers {
-    
-    //Na propojení vrstev
-    public static void Connect(ILayer upper, ILayer lower)
-    {
-        upper.SetLowerLayer(lower);
-        lower.SetUpperLayer(upper);
+public abstract class Layers {
+    /**
+     * Propojení dvou vrstev.
+     * 
+     * @param upper Upper layer.
+     * @param lower Lower layer.
+     */
+    public static void connect (LayerWithOutput upper, LayerWithInput lower) {
+        lower.setUpperLayer (upper);
+        upper.setLowerLayer (lower);
     }
-    
 }

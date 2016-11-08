@@ -1,24 +1,20 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.pv021.neuralnets.functions;
 
 /**
  *
- * @author lukas
+ * @author  Lukáš Daubner
+ * @since   2016-10-30
+ * @version 2016-11-07
  */
-public class HyperbolicTangent extends ActivationFunction {
-
+public class HyperbolicTangent implements ActivationFunction {
     @Override
-    public double Function(double innerPotencial) {
-        return Math.tanh(innerPotencial);
+    public double apply (double innerPotencial) {
+        return Math.tanh (innerPotencial);
     }
 
     @Override
-    public double Derivative(double innerPotencial) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public double derivative (double innerPotencial) {
+        // 1 - tanh^2 x = 1 / cos^2 x
+        return (1 - Math.pow (Math.tanh (innerPotencial), 2));
     }
-    
 }
