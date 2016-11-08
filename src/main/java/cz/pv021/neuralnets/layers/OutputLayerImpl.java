@@ -1,50 +1,52 @@
 package cz.pv021.neuralnets.layers;
 
-import cz.pv021.neuralnets.functions.ActivationFunction;
+import cz.pv021.neuralnets.functions.OutputFunction;
 import java.util.Random;
 
 /**
+ * Implementation of output layer.
+ * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-08
+ * @version 2016-11-07
  */
-public class FullyConnectedLayer implements HiddenLayer {
-    private final ActivationFunction activationFunction;
-    private LayerWithInput lowerLayer; // Vystupni
-    private LayerWithOutput upperLayer; // Vstupni
+public class OutputLayerImpl implements OutputLayer {
+    private final OutputFunction outputFunction;
     private final int numberOfUnits;
-    private final double[] output;
+    private double[] output;
+    private Layer upperLayer; // Vstupni
     private double[][] weights;
 
-    public FullyConnectedLayer (int numberOfUnits, ActivationFunction activationFunction) {
+    public OutputLayerImpl (int numberOfUnits, OutputFunction outputFunction) {
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
-        this.activationFunction = activationFunction;
+        this.outputFunction = outputFunction;
     }
-
+    
     @Override
     public void backwardPass () {
         throw new UnsupportedOperationException ("Not supported yet.");
     }
-
+    
     @Override
     public void forwardPass () {
         double[] input = upperLayer.getOutput ();
+        double[] innerPotencials = new double[numberOfUnits];
+        
         for (int n = 0; n < numberOfUnits; n++) {
-            // int innerPotencial = 0;
-            double innerPotencial = 0;
             for (int i = 0; i < weights[n].length; i++) {
-                innerPotencial += input[i] * weights[n][i];
+                innerPotencials[n] += input[i] * weights[n][i];
             }
-            output[n] = activationFunction.apply (innerPotencial);
         }
+        
+        this.output = outputFunction.apply (innerPotencials);
     }
     
     @Override
     public int getNumberOfUnits () {
         return numberOfUnits;
     }
-
+    
     @Override
     public double[] getOutput () {
         return output;
@@ -61,13 +63,8 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     @Override
-    public void setLowerLayer (LayerWithInput nextLayer) {
-        this.lowerLayer = nextLayer;
-    }
-    
-    @Override
-    public void setUpperLayer (LayerWithOutput previousLayer) {
-        this.upperLayer = previousLayer;
-        weights = new double[numberOfUnits][previousLayer.getNumberOfUnits ()];
+    public void setUpperLayer (LayerWithOutput layer) {
+        this.upperLayer = layer;
+        this.weights = new double[numberOfUnits][layer.getNumberOfUnits ()];
     }
 }

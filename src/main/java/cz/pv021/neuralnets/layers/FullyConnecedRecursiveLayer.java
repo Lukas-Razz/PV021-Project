@@ -1,49 +1,43 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.pv021.neuralnets.layers;
 
 /**
- *
- * @author lukas
+ * @author  Lukáš Daubner
+ * @since   2016-10-30
+ * @version 2016-11-07
  */
-public class FullyConnecedRecursiveLayer implements ILayer {
-
+public class FullyConnecedRecursiveLayer implements HiddenLayer {
     @Override
-    public void forwardPass() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void backwardPass () {
+        throw new UnsupportedOperationException ("Not supported yet.");
     }
 
     @Override
-    public void backwardPass() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void forwardPass () {
+        throw new UnsupportedOperationException ("Not supported yet.");
     }
 
     @Override
-    public void SetUpperLayer(ILayer layer) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public int getNumberOfUnits () {
+        throw new UnsupportedOperationException ("Not supported yet.");
     }
 
     @Override
-    public void SetLowerLayer(ILayer layer) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public double[] getOutput () {
+        throw new UnsupportedOperationException ("Not supported yet.");
     }
 
     @Override
-    public int GetNumberOfUnits() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public double[] GetOutput() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void initializeWeights(long seed) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void initializeWeights (long seed) {
+        throw new UnsupportedOperationException ("Not supported yet.");
     }
     
+    @Override
+    public void setLowerLayer (LayerWithInput layer) {
+        throw new UnsupportedOperationException ("Not supported yet.");
+    }
+
+    @Override
+    public void setUpperLayer (LayerWithOutput layer) {
+        throw new UnsupportedOperationException ("Not supported yet.");
+    }
 }

@@ -1,37 +1,35 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.pv021.neuralnets.functions;
 
 /**
  *
- * @author lukas
+ * @author  Lukáš Daubner
+ * @since   2016-10-30
+ * @version 2016-11-07
  */
-public class Softmax extends OutputFunction {
-
+public class Softmax implements OutputFunction {
     @Override
-    public double[] Function(double[] innerPotencials) {
+    public double[] apply (double[] innerPotencials) {
+        double[] output = new double[innerPotencials.length];
         double[] parts = new double[innerPotencials.length];
         double sumOfParts = 0;
-        double[] output = new double[innerPotencials.length];
-        
-        for(int i=0; i<innerPotencials.length; i++) {
-            parts[i] = Math.pow(Math.E, innerPotencials[i]);
+
+        for (int i = 0; i < innerPotencials.length; i++) {
+            parts[i] = Math.pow (Math.E, innerPotencials[i]);
         }
-        for(int i=0; i<parts.length; i++) {
+        
+        for (int i = 0; i < parts.length; i++) {
             sumOfParts += parts[i];
         }
-        for(int i=0; i<parts.length; i++) {
-            output[i] = parts[i]/sumOfParts;
+        
+        for (int i = 0; i < parts.length; i++) {
+            output[i] = parts[i] / sumOfParts;
         }
+        
         return output;
     }
 
     @Override
-    public double[] Derivative(double[] innerPotencials) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public double[] derivative (double[] innerPotencials) {
+        throw new UnsupportedOperationException ("Not supported yet.");
     }
-    
 }

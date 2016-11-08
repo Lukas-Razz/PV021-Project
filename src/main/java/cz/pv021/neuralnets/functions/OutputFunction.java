@@ -1,15 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.pv021.neuralnets.functions;
 
 /**
  *
- * @author lukas
+ * @author  Lukáš Daubner
+ * @since   2016-10-30
+ * @version 2016-11-07
  */
-public abstract class OutputFunction {
-    public abstract double[] Function(double[] innerPotencials);
-    public abstract double[] Derivative(double[] innerPotencials);
+public interface OutputFunction {
+    public double[] apply (double[] innerPotencials);
+    
+    public double[] derivative (double[] innerPotencials);
 }
