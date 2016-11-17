@@ -1,24 +1,31 @@
 package cz.pv021.neuralnets.layers;
 
 import cz.pv021.neuralnets.functions.ActivationFunction;
+import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-08
+ * @version 2016-11-17
  */
 public class FullyConnectedLayer implements HiddenLayer {
+    final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
+    
     private final ActivationFunction activationFunction;
     private LayerWithInput lowerLayer; // Vystupni
     private LayerWithOutput upperLayer; // Vstupni
     private final int numberOfUnits;
     private final double[] output;
     private double[][] weights;
+    private double[] bias; //TODO
 
     public FullyConnectedLayer (int numberOfUnits, ActivationFunction activationFunction) {
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
+        this.bias = new double[numberOfUnits];
         this.activationFunction = activationFunction;
     }
 
@@ -69,5 +76,10 @@ public class FullyConnectedLayer implements HiddenLayer {
     public void setUpperLayer (LayerWithOutput previousLayer) {
         this.upperLayer = previousLayer;
         weights = new double[numberOfUnits][previousLayer.getNumberOfUnits ()];
+    }
+
+    @Override
+    public LayerParameters getParameters() {
+        return new LayerParameters(weights, bias);
     }
 }

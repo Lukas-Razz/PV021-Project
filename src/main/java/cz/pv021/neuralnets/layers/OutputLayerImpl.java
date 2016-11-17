@@ -1,25 +1,32 @@
 package cz.pv021.neuralnets.layers;
 
 import cz.pv021.neuralnets.functions.OutputFunction;
+import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of output layer.
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-07
+ * @version 2016-11-17
  */
 public class OutputLayerImpl implements OutputLayer {
+    final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
+    
     private final OutputFunction outputFunction;
     private final int numberOfUnits;
     private double[] output;
     private Layer upperLayer; // Vstupni
     private double[][] weights;
+    private double[] bias; //TODO
 
     public OutputLayerImpl (int numberOfUnits, OutputFunction outputFunction) {
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
+        this.bias = new double[numberOfUnits];
         this.outputFunction = outputFunction;
     }
     
@@ -66,5 +73,10 @@ public class OutputLayerImpl implements OutputLayer {
     public void setUpperLayer (LayerWithOutput layer) {
         this.upperLayer = layer;
         this.weights = new double[numberOfUnits][layer.getNumberOfUnits ()];
+    }
+
+    @Override
+    public LayerParameters getParameters() {
+        return new LayerParameters(weights, bias);
     }
 }
