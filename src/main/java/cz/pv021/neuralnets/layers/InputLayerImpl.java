@@ -5,7 +5,7 @@ package cz.pv021.neuralnets.layers;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-07
+ * @version 2016-11-21
  */
 public class InputLayerImpl implements InputLayer {
     private LayerWithInput lowerLayer; // Vystupni
@@ -18,11 +18,6 @@ public class InputLayerImpl implements InputLayer {
     }
 
     @Override
-    public void clampInput (double[] input) {
-        this.output = input;
-    }
-
-    @Override
     public int getNumberOfUnits () {
         return numberOfUnits;
     }
@@ -32,6 +27,11 @@ public class InputLayerImpl implements InputLayer {
         return output;
     }
     
+    @Override
+    public void setInput (double[] input) {
+        this.output = input;
+    }
+
     @Override
     public void setLowerLayer (LayerWithInput layer) {
         this.lowerLayer = layer;
