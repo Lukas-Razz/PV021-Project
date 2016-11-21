@@ -1,5 +1,8 @@
 package cz.pv021.neuralnets.layers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Implementation of InputLayer.
  * 
@@ -8,6 +11,7 @@ package cz.pv021.neuralnets.layers;
  * @version 2016-11-21
  */
 public class InputLayerImpl implements InputLayer {
+    final Logger logger = LoggerFactory.getLogger (InputLayerImpl.class);
     private LayerWithInput lowerLayer; // Vystupni
     private final int numberOfUnits;
     private double[] output;
@@ -17,7 +21,6 @@ public class InputLayerImpl implements InputLayer {
         this.output = new double[numberOfUnits];
     }
 
-    @Override
     public int getNumberOfUnits () {
         return numberOfUnits;
     }
