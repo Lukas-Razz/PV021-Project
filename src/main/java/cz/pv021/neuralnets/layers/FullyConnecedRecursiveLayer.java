@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 public class FullyConnecedRecursiveLayer implements HiddenLayer {
     final Logger logger = LoggerFactory.getLogger(FullyConnecedRecursiveLayer.class);
     
-    
     @Override
     public void backwardPass () {
         throw new UnsupportedOperationException ("Not supported yet.");

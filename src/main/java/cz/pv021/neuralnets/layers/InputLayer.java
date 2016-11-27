@@ -5,8 +5,8 @@ package cz.pv021.neuralnets.layers;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-07
+ * @version 2016-11-21
  */
 public interface InputLayer extends LayerWithOutput {
-    public void clampInput (double[] input);   
+    public void setInput (double[] input);   
 }
