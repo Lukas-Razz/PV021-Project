@@ -9,4 +9,5 @@ package cz.pv021.neuralnets.error;
  */
 public interface Loss {
     double loss(double[] actual, double expected);
+    double derivative(double innerPontencial);
 }

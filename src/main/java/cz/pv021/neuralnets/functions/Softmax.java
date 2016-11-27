@@ -29,7 +29,13 @@ public class Softmax implements OutputFunction {
     }
 
     @Override
+    // Softmax_i' = ksi_i * ( 1 - ksi_i )
     public double[] derivative (double[] innerPotencials) {
-        throw new UnsupportedOperationException ("Not supported yet.");
+        double[] output = new double[innerPotencials.length];
+        for(int i=0; i<output.length; i++)
+        {
+            output[i] = innerPotencials[i] * ( 1 - innerPotencials[i] );
+        }
+        return output;
     }
 }

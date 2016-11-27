@@ -26,6 +26,11 @@ public class Cost {
         this.l2 = l2;
     }
     
+    public Loss getLoss()
+    {
+        return loss;
+    }
+    
     public double getError(List<OutputExample> batch, List<LayerParameters> parameters) {
         double lossSum = 0;
         for(OutputExample example : batch) {

@@ -1,7 +1,11 @@
 package cz.pv021.neuralnets.layers;
 
+import cz.pv021.neuralnets.error.Cost;
+import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.OutputFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,26 +25,51 @@ public class OutputLayerImpl implements OutputLayer {
     private double[] output;
     private Layer upperLayer; // Vstupni
     private double[][] weights;
-    private double[] bias; //TODO
+    private double[] bias;
+    
+    private double[] innerPotencials;
+    
+    private List<double[][]> weightErrors;
+    private List<double[]> biasErrors;
+    
+    private Loss loss; // narvi tam loss
 
     public OutputLayerImpl (int numberOfUnits, OutputFunction outputFunction) {
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
         this.bias = new double[numberOfUnits];
         this.outputFunction = outputFunction;
+        
+        this.innerPotencials = new double[numberOfUnits];
+        
+        weightErrors = new ArrayList<>();
+        biasErrors = new ArrayList<>();
+        
     }
     
     @Override
     public void backwardPass () {
-        throw new UnsupportedOperationException ("Not supported yet.");
+        double[] e_wrt_innerP = new double[numberOfUnits];
+        double[][] e_wrt_weight = new double[numberOfUnits][upperLayer.getNumberOfUnits()];
+        
+        for(int i=0; i<numberOfUnits; i++) {
+            e_wrt_innerP[i] = loss.derivative(innerPotencials[i]);
+            
+            for(int j=0; j<upperLayer.getNumberOfUnits(); j++) {
+                e_wrt_weight[i][j] = e_wrt_innerP[i] * upperLayer.getOutput()[j]; // innerPotential of neuron "i" * output of neuron "j"
+            }
+        }
+        biasErrors.add(e_wrt_innerP); // e_wrt_innerP = e_wrt_bias
+        weightErrors.add(e_wrt_weight);
     }
     
     @Override
+    //Inner potencial is remembered for backward pass
     public void forwardPass () {
         double[] input = upperLayer.getOutput ();
-        double[] innerPotencials = new double[numberOfUnits];
         
         for (int n = 0; n < numberOfUnits; n++) {
+            innerPotencials[n] = bias[n];
             for (int i = 0; i < weights[n].length; i++) {
                 innerPotencials[n] += input[i] * weights[n][i];
             }
@@ -66,6 +95,9 @@ public class OutputLayerImpl implements OutputLayer {
             for (int j = 0; j < weights[i].length; j++) {
                 weights[i][j] = r.nextGaussian ();
             }
+        }
+        for (int i = 0; i < bias.length; i++) {
+            bias[i] = 0;
         }
     }
     

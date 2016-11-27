@@ -20,7 +20,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     private final int numberOfUnits;
     private final double[] output;
     private double[][] weights;
-    private double[] bias; //TODO
+    private double[] bias;
 
     public FullyConnectedLayer (int numberOfUnits, ActivationFunction activationFunction) {
         this.numberOfUnits = numberOfUnits;
@@ -38,8 +38,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     public void forwardPass () {
         double[] input = upperLayer.getOutput ();
         for (int n = 0; n < numberOfUnits; n++) {
-            // int innerPotencial = 0;
-            double innerPotencial = 0;
+            double innerPotencial = bias[n];
             for (int i = 0; i < weights[n].length; i++) {
                 innerPotencial += input[i] * weights[n][i];
             }
@@ -64,6 +63,9 @@ public class FullyConnectedLayer implements HiddenLayer {
             for (int j = 0; j < weights[i].length; j++) {
                 weights[i][j] = r.nextGaussian ();
             }
+        }
+        for (int i = 0; i < bias.length; i++) {
+            bias[i] = 0;
         }
     }
     

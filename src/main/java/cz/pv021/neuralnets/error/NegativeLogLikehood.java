@@ -13,4 +13,10 @@ public class NegativeLogLikehood implements Loss {
         int classNo = (int)expected;
         return -Math.log(actual[classNo]);
     }
+    
+    @Override
+    public double derivative(double innerPontencial)
+    {
+        return -(1/innerPontencial);
+    }
 }
