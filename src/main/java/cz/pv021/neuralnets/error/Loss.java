@@ -5,9 +5,9 @@ package cz.pv021.neuralnets.error;
  * 
  * @author Lukáš Daubner
  * @since   2016-11-17
- * @version 2016-11-17
+ * @version 2016-11-27
  */
 public interface Loss {
     double loss(double[] actual, double expected);
-    double derivative(double innerPontencial);
+    double derivative(double[] actual, double expected);
 }

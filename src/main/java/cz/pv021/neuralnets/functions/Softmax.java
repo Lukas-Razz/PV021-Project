@@ -4,7 +4,7 @@ package cz.pv021.neuralnets.functions;
  *
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-07
+ * @version 2016-11-27
  */
 public class Softmax implements OutputFunction {
     @Override
@@ -31,10 +31,12 @@ public class Softmax implements OutputFunction {
     @Override
     // Softmax_i' = ksi_i * ( 1 - ksi_i )
     public double[] derivative (double[] innerPotencials) {
+        double[] apply = this.apply(innerPotencials);
+        
         double[] output = new double[innerPotencials.length];
         for(int i=0; i<output.length; i++)
         {
-            output[i] = innerPotencials[i] * ( 1 - innerPotencials[i] );
+            output[i] = apply[i] * ( 1 - apply[i] );
         }
         return output;
     }

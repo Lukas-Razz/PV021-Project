@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Lukas Daubner
  * @since   2016-11-17
- * @version 2016-11-17
+ * @version 2016-11-27
  */
 public class Cost {
     final Logger logger = LoggerFactory.getLogger(Cost.class);
@@ -42,7 +42,7 @@ public class Cost {
         return cost;
     }
     
-    private double computeL1(List<LayerParameters> parameters) {
+    public double computeL1(List<LayerParameters> parameters) {
         double sum = 0;
         for(LayerParameters layer : parameters) {
             for(int i=0; i<layer.getWeights().length; i++){
@@ -54,7 +54,7 @@ public class Cost {
         return sum;
     }
     
-    private double computeL2(List<LayerParameters> parameters) {
+    public double computeL2(List<LayerParameters> parameters) {
         double sum = 0;
         for(LayerParameters layer : parameters) {
             for(int i=0; i<layer.getWeights().length; i++){
