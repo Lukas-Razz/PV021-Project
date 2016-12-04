@@ -21,6 +21,7 @@ public class InputLayerImpl implements InputLayer {
         this.output = new double[numberOfUnits];
     }
 
+    @Override
     public int getNumberOfUnits () {
         return numberOfUnits;
     }
