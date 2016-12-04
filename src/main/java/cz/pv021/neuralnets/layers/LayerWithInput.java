@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Any layer with preceding layer, i.e. any except the input layer.
  * 
- * @author  Josef Plch
+ * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-08
  * @version 2016-11-27
  */
@@ -23,12 +23,13 @@ public interface LayerWithInput extends Layer {
     
     public void initializeWeights (long seed);
     
-    public LayerParameters getParameters();
-    public void setParameters(LayerParameters parameters);
+    public double[] getInnerPotentialGradient ();
     
-    public double[] getInnerPotentialGradient();
+    public LayerParameters getParameters ();
     
-    public List<LayerParameters> getErrors();
+    public List<LayerParameters> getErrors ();
+    
+    public void setParameters (LayerParameters parameters);
     
     /**
      * Nastav předchozí vrstvu.

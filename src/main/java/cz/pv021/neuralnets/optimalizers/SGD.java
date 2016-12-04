@@ -10,8 +10,7 @@ import cz.pv021.neuralnets.utils.LayerParameters;
  * @version 2016-11-27
  */
 public class SGD {
-    
-    private double learningRate;
+    private final double learningRate;
     
     public SGD(double learningRate) {
         this.learningRate = learningRate;
@@ -35,8 +34,8 @@ public class SGD {
     
     public LayerParameters changeParameters(LayerParameters parameters, LayerParameters gradients) {
         return new LayerParameters(
-                changeWeights(parameters.getWeights(), gradients.getWeights()), 
-                changeBias(parameters.getBias(), gradients.getBias())
+            changeWeights(parameters.getWeights(), gradients.getWeights()), 
+            changeBias(parameters.getBias(), gradients.getBias())
         );
     }
 }
