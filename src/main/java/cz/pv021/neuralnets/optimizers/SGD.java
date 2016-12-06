@@ -1,4 +1,4 @@
-package cz.pv021.neuralnets.optimalizers;
+package cz.pv021.neuralnets.optimizers;
 
 import cz.pv021.neuralnets.utils.LayerParameters;
 
@@ -9,7 +9,7 @@ import cz.pv021.neuralnets.utils.LayerParameters;
  * @since   2016-11-27
  * @version 2016-12-06
  */
-public class SGD implements Optimalizer {
+public class SGD implements Optimizer {
     private final double learningRate;
     
     public SGD(double learningRate) {
