@@ -1,10 +1,10 @@
 package cz.pv021.neuralnets.demo;
 
+import cz.pv021.neuralnets.optimizers.SGD;
 import cz.pv021.neuralnets.error.*;
 import cz.pv021.neuralnets.layers.*;
 import cz.pv021.neuralnets.functions.*;
 import cz.pv021.neuralnets.network.MultilayerPerceptron;
-import cz.pv021.neuralnets.optimalizers.*;
 import cz.pv021.neuralnets.utils.Pair;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cz.pv021.neuralnets.optimizers.Optimizer;
 
 /**
  * @author  Lukáš Daubner, Josef Plch
@@ -26,7 +27,7 @@ public class MLP {
         
     public static void main (String[] args) {
         Cost cost = new Cost (new SquaredError(), 0.00, 0.0001);
-        Optimalizer sgd = new SGD (0.01);
+        Optimizer sgd = new SGD (0.01);
         
         ByteInputLayer layer0 = new ByteInputLayer ();
         HiddenLayer    layer1 = new FullyConnectedLayer (10, new HyperbolicTangent (), cost.getLoss ());

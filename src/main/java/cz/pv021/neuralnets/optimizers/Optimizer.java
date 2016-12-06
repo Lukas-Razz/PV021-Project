@@ -1,4 +1,4 @@
-package cz.pv021.neuralnets.optimalizers;
+package cz.pv021.neuralnets.optimizers;
 
 import cz.pv021.neuralnets.utils.LayerParameters;
 
@@ -9,7 +9,7 @@ import cz.pv021.neuralnets.utils.LayerParameters;
  * @since   2016-12-06
  * @version 2016-12-06
  */
-public interface Optimalizer {
+public interface Optimizer {
 
     double[] changeBias(double[] bias, double[] biasGradients);
 

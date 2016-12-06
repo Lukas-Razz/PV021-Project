@@ -6,10 +6,10 @@ import cz.pv021.neuralnets.layers.InputLayer;
 import cz.pv021.neuralnets.layers.LayerWithInput;
 import cz.pv021.neuralnets.layers.Layers;
 import cz.pv021.neuralnets.layers.OutputLayer;
-import cz.pv021.neuralnets.optimalizers.Optimalizer;
-import cz.pv021.neuralnets.optimalizers.SGD;
+import cz.pv021.neuralnets.optimizers.SGD;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.List;
+import cz.pv021.neuralnets.optimizers.Optimizer;
 
 /**
  * @param <IL> Type of the input layer.
@@ -34,14 +34,14 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
         connectLayers ();
     }
     
-    private void adaptLayerWeights (Optimalizer adapter, LayerWithInput layer) {
+    private void adaptLayerWeights (Optimizer adapter, LayerWithInput layer) {
         LayerParameters parameters = layer.getParameters ();
         LayerParameters gradients = layer.getErrors().get(0); //TODO: potřebujeme nastavitelnou dávku. Tj, průměr gradientů v dávce
         layer.setParameters (adapter.changeParameters (parameters, gradients));
         layer.resetGradients();
     }
     
-    public void adaptWeights (Optimalizer adapter) {
+    public void adaptWeights (Optimizer adapter) {
         hiddenLayers.forEach (hiddenLayer -> {
             adaptLayerWeights (adapter, hiddenLayer);
         });
