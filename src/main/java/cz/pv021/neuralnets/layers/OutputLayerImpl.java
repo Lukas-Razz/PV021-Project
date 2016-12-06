@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-27
+ * @version 2016-12-06
  */
 public class OutputLayerImpl implements OutputLayer {
     final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
@@ -55,13 +55,10 @@ public class OutputLayerImpl implements OutputLayer {
     @Override
     public void backwardPass () {
         double[][] err_wrt_weight = new double[numberOfUnits][upperLayer.getNumberOfUnits()];
-        
-        double error = loss.derivative(output, expectedOutput);
-        logger.info("loss:"+error);
         double[] preSoftmax = outputFunction.derivative(innerPotentials);
-        logger.info("preSoftmax:"+Arrays.toString(preSoftmax));
         
         for(int i=0; i<numberOfUnits; i++) {
+            double error = i == expectedOutput ? loss.derivative(output[i], 1) : loss.derivative(output[i], 0); //pro klasifikaci
             err_wrt_innerP[i] = error * preSoftmax[i];
             
             for(int j=0; j<upperLayer.getNumberOfUnits(); j++) {
@@ -83,7 +80,6 @@ public class OutputLayerImpl implements OutputLayer {
                 innerPotentials[n] += input[i] * weights[n][i];
             }
         }
-        
         this.output = outputFunction.apply (innerPotentials);
     }
     
@@ -102,7 +98,7 @@ public class OutputLayerImpl implements OutputLayer {
         Random r = new Random (seed);
         for (int i = 0; i < weights.length; i++) {
             for (int j = 0; j < weights[i].length; j++) {
-                weights[i][j] = r.nextGaussian ();
+                weights[i][j] = Math.abs(r.nextGaussian ()); //Softmax nerad minus
             }
         }
         for (int i = 0; i < bias.length; i++) {
@@ -139,6 +135,12 @@ public class OutputLayerImpl implements OutputLayer {
             errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
         }
         return errors;
+    }
+    
+    @Override
+    public void resetGradients() {
+        biasErrors.clear();
+        weightErrors.clear();
     }
 
     @Override

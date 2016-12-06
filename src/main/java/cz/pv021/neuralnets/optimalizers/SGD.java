@@ -7,15 +7,16 @@ import cz.pv021.neuralnets.utils.LayerParameters;
  * 
  * @author  Lukáš Daubner
  * @since   2016-11-27
- * @version 2016-11-27
+ * @version 2016-12-06
  */
-public class SGD {
+public class SGD implements Optimalizer {
     private final double learningRate;
     
     public SGD(double learningRate) {
         this.learningRate = learningRate;
     }
     
+    @Override
     public double[][] changeWeights(double[][] weights, double[][] weightGradients) {
         for(int i=0; i<weights.length; i++) {
             for(int j=0; j<weights[i].length; j++) {
@@ -25,6 +26,7 @@ public class SGD {
         return weights;
     }
     
+    @Override
     public double[] changeBias(double[] bias, double[] biasGradients) {
         for(int i=0; i<bias.length; i++) {
             bias[i] = bias[i] - learningRate * biasGradients[i];
@@ -32,6 +34,7 @@ public class SGD {
         return bias;
     }
     
+    @Override
     public LayerParameters changeParameters(LayerParameters parameters, LayerParameters gradients) {
         return new LayerParameters(
             changeWeights(parameters.getWeights(), gradients.getWeights()), 

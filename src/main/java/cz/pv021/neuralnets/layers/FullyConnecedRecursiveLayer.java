@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-27
+ * @version 2016-12-06
  */
 public class FullyConnecedRecursiveLayer implements HiddenLayer {
     final Logger logger = LoggerFactory.getLogger(FullyConnecedRecursiveLayer.class);
@@ -65,6 +65,11 @@ public class FullyConnecedRecursiveLayer implements HiddenLayer {
 
     @Override
     public List<LayerParameters> getErrors() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void resetGradients() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

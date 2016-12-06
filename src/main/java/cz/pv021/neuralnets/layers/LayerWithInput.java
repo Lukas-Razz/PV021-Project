@@ -8,7 +8,7 @@ import java.util.List;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-08
- * @version 2016-11-27
+ * @version 2016-12-06
  */
 public interface LayerWithInput extends Layer {
     /**
@@ -28,6 +28,8 @@ public interface LayerWithInput extends Layer {
     public LayerParameters getParameters ();
     
     public List<LayerParameters> getErrors ();
+    
+    public void resetGradients();
     
     public void setParameters (LayerParameters parameters);
     

@@ -4,6 +4,7 @@ import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.ActivationFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-27
+ * @version 2016-12-06
  */
 public class FullyConnectedLayer implements HiddenLayer {
     final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
@@ -135,5 +136,11 @@ public class FullyConnectedLayer implements HiddenLayer {
             errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
         }
         return errors;
+    }
+
+    @Override
+    public void resetGradients() {
+        biasErrors.clear();
+        weightErrors.clear();
     }
 }

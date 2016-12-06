@@ -5,12 +5,13 @@ import cz.pv021.neuralnets.utils.OutputExample;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * 
  * @author Lukas Daubner
  * @since   2016-11-17
- * @version 2016-11-27
+ * @version 2016-12-06
  */
 public class Cost {
     final Logger logger = LoggerFactory.getLogger(Cost.class);
@@ -31,10 +32,16 @@ public class Cost {
         return loss;
     }
     
-    public double getError(List<OutputExample> batch, List<LayerParameters> parameters) {
+    public double getBatchError(List<OutputExample> batch, List<LayerParameters> parameters) {
         double lossSum = 0;
         for(OutputExample example : batch) {
-            lossSum += loss.loss(example.getActualOutput(), example.getExpectedOutput());
+            for (int i=0; i<example.getActualOutput().length; i++) {
+                //pouze pro klasifikaci
+                if(i == example.getExpectedOutput())
+                    lossSum += loss.loss(example.getActualOutput()[i], 1);
+                else
+                    lossSum += loss.loss(example.getActualOutput()[i], 0);
+            }
         }
         double cost = lossSum / batch.size() 
                 + (l1 != 0 ? computeL1(parameters) * l1 : 0) 

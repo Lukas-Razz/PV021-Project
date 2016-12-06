@@ -1,10 +1,12 @@
 package cz.pv021.neuralnets.network;
 
+import cz.pv021.neuralnets.error.Cost;
 import cz.pv021.neuralnets.layers.HiddenLayer;
 import cz.pv021.neuralnets.layers.InputLayer;
 import cz.pv021.neuralnets.layers.LayerWithInput;
 import cz.pv021.neuralnets.layers.Layers;
 import cz.pv021.neuralnets.layers.OutputLayer;
+import cz.pv021.neuralnets.optimalizers.Optimalizer;
 import cz.pv021.neuralnets.optimalizers.SGD;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.List;
@@ -15,30 +17,31 @@ import java.util.List;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-17
- * @version 2016-12-04
+ * @version 2016-12-06
  */
 public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer> implements Network {
     private final IL inputLayer;
     private final List <HiddenLayer> hiddenLayers;
     private final OL outputLayer;
     
-    public MultilayerPerceptron (IL inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer) {
+    private Cost cost;
+    
+    public MultilayerPerceptron (IL inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost) {
         this.inputLayer = inputLayer;
         this.hiddenLayers = hiddenLayers;
         this.outputLayer = outputLayer;
+        this.cost = cost;
         connectLayers ();
     }
     
-    private void adaptLayerWeights (SGD adapter, LayerWithInput layer) {
+    private void adaptLayerWeights (Optimalizer adapter, LayerWithInput layer) {
         LayerParameters parameters = layer.getParameters ();
-        LayerParameters gradients = layer.getErrors().get(0);
-        // TODO: Tady bylo (principialne):
-        // outputLayer.setParameters (...)
-        // Predpokladam, ze to byl preklep, ale radsi zkontrolovat.
+        LayerParameters gradients = layer.getErrors().get(0); //TODO: potřebujeme nastavitelnou dávku. Tj, průměr gradientů v dávce
         layer.setParameters (adapter.changeParameters (parameters, gradients));
+        layer.resetGradients();
     }
     
-    public void adaptWeights (SGD adapter) {
+    public void adaptWeights (Optimalizer adapter) {
         hiddenLayers.forEach (hiddenLayer -> {
             adaptLayerWeights (adapter, hiddenLayer);
         });
