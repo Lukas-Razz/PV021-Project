@@ -1,44 +1,44 @@
 package cz.pv021.neuralnets.optimizers;
 
 import cz.pv021.neuralnets.utils.LayerParameters;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of Stochastic Gradient Descend.
  * 
  * @author  Lukáš Daubner
  * @since   2016-11-27
- * @version 2016-12-06
+ * @version 2016-12-07
  */
-public class SGD implements Optimizer {
-    private final double learningRate;
-    
-    public SGD(double learningRate) {
-        this.learningRate = learningRate;
-    }
+public class SGD implements OptimizerAlgorithm {
+    private static final Logger LOGGER = LoggerFactory.getLogger (SGD.class);
     
     @Override
-    public double[][] changeWeights(double[][] weights, double[][] weightGradients) {
-        for(int i=0; i<weights.length; i++) {
-            for(int j=0; j<weights[i].length; j++) {
-                weights[i][j] = weights[i][j] - learningRate * weightGradients[i][j];
+    public LayerParameters computeChange(List<LayerParameters> gradients) {        
+        LayerParameters avgGradient = gradients.get(0);
+        int batchSize = gradients.size();
+        
+        //Summing
+        for(int k=1; k<batchSize; k++) {
+            for(int i=0; i<gradients.get(k).getWeights().length; i++) {
+                for(int j=0; j<gradients.get(k).getWeights()[i].length; j++) {
+                    avgGradient.getWeights()[i][j] += gradients.get(k).getWeights()[i][j]; //Weights
+                }
+                avgGradient.getBias()[i] += gradients.get(k).getBias()[i]; //Bias
             }
         }
-        return weights;
-    }
-    
-    @Override
-    public double[] changeBias(double[] bias, double[] biasGradients) {
-        for(int i=0; i<bias.length; i++) {
-            bias[i] = bias[i] - learningRate * biasGradients[i];
+        //Averaging
+        for(int i=0; i<avgGradient.getWeights().length; i++) {
+            for(int j=0; j<avgGradient.getWeights()[i].length; j++) {
+                avgGradient.getWeights()[i][j] = avgGradient.getWeights()[i][j] / batchSize;
+            }
+            avgGradient.getBias()[i] = avgGradient.getBias()[i] / batchSize;
         }
-        return bias;
-    }
-    
-    @Override
-    public LayerParameters changeParameters(LayerParameters parameters, LayerParameters gradients) {
-        return new LayerParameters(
-            changeWeights(parameters.getWeights(), gradients.getWeights()), 
-            changeBias(parameters.getBias(), gradients.getBias())
-        );
+        
+        return avgGradient;
     }
 }
