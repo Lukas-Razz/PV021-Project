@@ -1,15 +1,15 @@
 package cz.pv021.neuralnets.layers;
 
 /**
- * Podpůrná třída s pomocnými metodami pro lepší práci s vrstvami.
+ * Helper class for layers
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-07
+ * @version 2016-12-07
  */
 public abstract class Layers {
     /**
-     * Propojení dvou vrstev.
+     * Connect two layers.
      * 
      * @param upper Upper layer.
      * @param lower Lower layer.

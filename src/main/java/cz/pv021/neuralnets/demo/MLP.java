@@ -20,18 +20,18 @@ import cz.pv021.neuralnets.optimizers.Optimizer;
 /**
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-10-30
- * @version 2016-12-06
+ * @version 2016-12-07
  */
 public class MLP {
     private static final Logger LOGGER = LoggerFactory.getLogger (MLP.class);
         
     public static void main (String[] args) {
         Cost cost = new Cost (new SquaredError(), 0.00, 0.0001);
-        Optimizer sgd = new SGD (0.01);
+        Optimizer optimizer = new Optimizer(0.01, new SGD());
         
         ByteInputLayer layer0 = new ByteInputLayer ();
-        HiddenLayer    layer1 = new FullyConnectedLayer (10, new HyperbolicTangent (), cost.getLoss ());
-        OutputLayer    layer2 = new OutputLayerImpl (3, new Softmax (), cost.getLoss ());
+        HiddenLayer    layer1 = new FullyConnectedLayer (10, new HyperbolicTangent ());
+        OutputLayer    layer2 = new OutputLayerImpl (3, new Softmax ());
         
         String irisTrainFile = "Iris_train.data";
         
@@ -50,7 +50,8 @@ public class MLP {
             new InputLayerImpl (4),
             Arrays.asList (layer1),
             layer2,
-            cost //TODO: nacpat loss do vrsvev prez vlastnost
+            cost,
+            optimizer
         );
         
         try {
@@ -62,6 +63,8 @@ public class MLP {
             
             //TODO: u datasetu vyřeš to načítání ze souboru. Loss má teď zadrátováno že je jen pro klasifikaci, to se může zobecnit
             //      chtělo by to i vyhodnocení výsledků na testovací sadě, precission, accuracy.
+            int batchSize = 1;
+            int batchIter = 0;
             for (int epoch = 0; epoch < 50; epoch++) {
                 for (Pair<double[], IrisClass> entry : dataset) {
                     double[] attributes = entry.getA ();
@@ -75,7 +78,14 @@ public class MLP {
                     //TODO: chtělo by to vypsat error celé jedné dávky (metoda je na to připdavena v Cost)
                     
                     irisPerceptron.backwardPass ();
-                    irisPerceptron.adaptWeights (sgd);            
+                    
+                    //pro batch > 1 zlobí Bias....u něj chyba roste geometrickou řadou. U vah je to v pohodě.
+                    if(batchIter == batchSize-1) {
+                        irisPerceptron.adaptWeights();
+                        batchIter = 0;
+                    }
+                    else
+                        batchIter++;
                 }
             }
         }

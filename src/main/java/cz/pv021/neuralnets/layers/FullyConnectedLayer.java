@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-06
+ * @version 2016-12-07
  */
 public class FullyConnectedLayer implements HiddenLayer {
     final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
@@ -31,15 +31,12 @@ public class FullyConnectedLayer implements HiddenLayer {
     
     private List<double[][]> weightErrors;
     private List<double[]> biasErrors;
-    
-    private Loss loss;
 
-    public FullyConnectedLayer (int numberOfUnits, ActivationFunction activationFunction, Loss loss) {
+    public FullyConnectedLayer (int numberOfUnits, ActivationFunction activationFunction) {
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
         this.bias = new double[numberOfUnits];
         this.activationFunction = activationFunction;
-        this.loss = loss;
         
         this.innerPotencials = new double[numberOfUnits];
         this.err_wrt_innerP = new double[numberOfUnits];
@@ -71,11 +68,11 @@ public class FullyConnectedLayer implements HiddenLayer {
     public void forwardPass () {
         double[] input = upperLayer.getOutput ();
         for (int n = 0; n < numberOfUnits; n++) {
-            double innerPotencial = bias[n];
+            innerPotencials[n] = bias[n];
             for (int i = 0; i < weights[n].length; i++) {
-                innerPotencial += input[i] * weights[n][i];
+                innerPotencials[n] += input[i] * weights[n][i];
             }
-            output[n] = activationFunction.apply (innerPotencial);
+            output[n] = activationFunction.apply (innerPotencials[n]);
         }
     }
     
