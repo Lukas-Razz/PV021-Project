@@ -6,7 +6,6 @@ import cz.pv021.neuralnets.layers.InputLayer;
 import cz.pv021.neuralnets.layers.LayerWithInput;
 import cz.pv021.neuralnets.layers.Layers;
 import cz.pv021.neuralnets.layers.OutputLayer;
-import cz.pv021.neuralnets.optimizers.SGD;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.List;
 import cz.pv021.neuralnets.optimizers.Optimizer;
@@ -17,15 +16,14 @@ import cz.pv021.neuralnets.optimizers.Optimizer;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-17
- * @version 2016-12-06
+ * @version 2016-12-08
  */
 public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer> implements Network {
     private final IL inputLayer;
     private final List <HiddenLayer> hiddenLayers;
     private final OL outputLayer;
-    
-    private Cost cost;
-    private Optimizer optimizer;
+    private final Cost cost;
+    private final Optimizer optimizer;
     
     public MultilayerPerceptron (IL inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
         this.inputLayer = inputLayer;
@@ -33,8 +31,8 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
         this.outputLayer = outputLayer;
         this.cost = cost;
         this.optimizer = optimizer;
+        this.outputLayer.setLoss (cost.getLoss ());
         connectLayers ();
-        this.outputLayer.setLoss(cost.getLoss());
     }
     
     private void adaptLayerWeights (LayerWithInput layer) {
@@ -91,6 +89,11 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
         return outputLayer.getOutput ();
     }
     
+    // Delegate method.
+    public int getOutputClassIndex () {
+        return outputLayer.getOutputClassIndex ();
+    }
+    
     public OL getOutputLayer () {
         return outputLayer;
     }
@@ -103,12 +106,12 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
     }
     
     // Delegate method.
-    public void setInput (double[] input) {
-        inputLayer.setInput (input);
+    public void setExpectedOutput (double expectedOutput) {
+        outputLayer.setExpectedOutput (expectedOutput);
     }
     
     // Delegate method.
-    public void setExpectedOutput (double expectedOutput) {
-        outputLayer.setExpectedOutput (expectedOutput);
+    public void setInput (double[] input) {
+        inputLayer.setInput (input);
     }
 }

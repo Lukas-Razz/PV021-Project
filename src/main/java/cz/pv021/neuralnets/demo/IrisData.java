@@ -9,11 +9,10 @@ import java.util.List;
  * 
  * @author  Lukáš Daubner
  * @since   2016-12-06
- * @version 2016-12-06
+ * @version 2016-12-07
  */
 public class IrisData {
-
-public static List<String> getData() {
+    public static List<String> getData() {
         List <String> data = Arrays.asList(
             "5.1,3.5,1.4,0.2,Iris-setosa",
             "4.9,3.0,1.4,0.2,Iris-setosa",
@@ -165,16 +164,14 @@ public static List<String> getData() {
             "6.5,3.0,5.2,2.0,Iris-virginica",
             "6.2,3.4,5.4,2.3,Iris-virginica",
             "5.9,3.0,5.1,1.8,Iris-virginica"
-    );
-    
-    List<String> list = new ArrayList<>();
-    for(int i=1; i<=50; i++)
-    {
-        list.add(data.get(i-1));
-        list.add(data.get(i+50-1));
-        list.add(data.get(i+100-1));
+        );
+        
+        List<String> list = new ArrayList<>();
+        for (int i=1; i<=50; i++) {
+            list.add(data.get(i-1));
+            list.add(data.get(i+50-1));
+            list.add(data.get(i+100-1));
+        }
+        return list;
     }
-    return list;
-}
-
 }
