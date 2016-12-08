@@ -1,6 +1,5 @@
 package cz.pv021.neuralnets.layers;
 
-import cz.pv021.neuralnets.error.Cost;
 import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.OutputFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-06
+ * @version 2016-12-07
  */
 public class OutputLayerImpl implements OutputLayer {
     final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
@@ -37,12 +36,11 @@ public class OutputLayerImpl implements OutputLayer {
     private double[] output;
     private double expectedOutput;
 
-    public OutputLayerImpl (int numberOfUnits, OutputFunction outputFunction, Loss loss) {
+    public OutputLayerImpl (int numberOfUnits, OutputFunction outputFunction) {
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
         this.bias = new double[numberOfUnits];
         this.outputFunction = outputFunction;
-        this.loss = loss;
         
         this.innerPotentials = new double[numberOfUnits];
         this.err_wrt_innerP = new double[numberOfUnits];
@@ -146,5 +144,10 @@ public class OutputLayerImpl implements OutputLayer {
     @Override
     public void setExpectedOutput(double expectedOutput) {
         this.expectedOutput = expectedOutput;
+    }
+
+    @Override
+    public void setLoss(Loss loss) {
+        this.loss = loss;
     }
 }

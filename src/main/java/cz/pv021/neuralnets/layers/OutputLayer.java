@@ -1,12 +1,15 @@
 package cz.pv021.neuralnets.layers;
 
+import cz.pv021.neuralnets.error.Loss;
+
 /**
- * Just an interface alias.
+ * Output layer interface.
  * 
  * @author  Josef Plch
  * @since   2016-11-08
  * @version 2016-12-08
  */
+
 public interface OutputLayer extends LayerWithInput {
     /**
      * Default implementation.
@@ -28,6 +31,7 @@ public interface OutputLayer extends LayerWithInput {
         
         return bestClassIndex;
     }
-    
     public void setExpectedOutput (double expectedOutput);
+    
+    public void setLoss (Loss loss);
 }

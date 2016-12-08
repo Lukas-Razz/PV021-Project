@@ -23,27 +23,30 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
     private final List <HiddenLayer> hiddenLayers;
     private final OL outputLayer;
     private final Cost cost;
+    private final Optimizer optimizer;
     
-    public MultilayerPerceptron (IL inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost) {
+    public MultilayerPerceptron (IL inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
         this.inputLayer = inputLayer;
         this.hiddenLayers = hiddenLayers;
         this.outputLayer = outputLayer;
         this.cost = cost;
+        this.optimizer = optimizer;
+        this.outputLayer.setLoss (cost.getLoss ());
         connectLayers ();
     }
     
-    private void adaptLayerWeights (Optimizer adapter, LayerWithInput layer) {
+    private void adaptLayerWeights (LayerWithInput layer) {
         LayerParameters parameters = layer.getParameters ();
-        LayerParameters gradients = layer.getErrors().get(0); //TODO: potřebujeme nastavitelnou dávku. Tj, průměr gradientů v dávce
-        layer.setParameters (adapter.changeParameters (parameters, gradients));
+        List<LayerParameters> gradients = layer.getErrors();
+        layer.setParameters (optimizer.changeParameters (parameters, gradients));
         layer.resetGradients();
     }
     
-    public void adaptWeights (Optimizer adapter) {
+    public void adaptWeights () {
         hiddenLayers.forEach (hiddenLayer -> {
-            adaptLayerWeights (adapter, hiddenLayer);
+            adaptLayerWeights (hiddenLayer);
         });
-        adaptLayerWeights (adapter, outputLayer);
+        adaptLayerWeights (outputLayer);
     }
     
     public void backwardPass () {

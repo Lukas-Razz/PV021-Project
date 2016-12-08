@@ -19,7 +19,7 @@ import java.nio.file.Files;
 /**
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-10-30
- * @version 2016-12-06
+ * @version 2016-12-08
  */
 public class MLP {
     private static final Logger LOGGER = LoggerFactory.getLogger (MLP.class);
@@ -35,11 +35,11 @@ public class MLP {
     
     private static void testIris () throws IOException {
         Cost cost = new Cost (new SquaredError(), 0.00, 0.0001);
-        Optimizer sgd = new SGD (0.01);
+        Optimizer optimizer = new Optimizer(0.01, new SGD());
         
         ByteInputLayer layer0 = new ByteInputLayer ();
-        HiddenLayer    layer1 = new FullyConnectedLayer (10, new HyperbolicTangent (), cost.getLoss ());
-        OutputLayer    layer2 = new OutputLayerImpl (3, new Softmax (), cost.getLoss ());
+        HiddenLayer    layer1 = new FullyConnectedLayer (10, new HyperbolicTangent ());
+        OutputLayer    layer2 = new OutputLayerImpl (3, new Softmax ());
         
         String irisTrainFile = "./data/iris/Iris_train.data";
         Path irisTrainFilePath = FileSystems.getDefault().getPath (irisTrainFile);
@@ -51,7 +51,8 @@ public class MLP {
             new InputLayerImpl (4),
             Arrays.asList (layer1),
             layer2,
-            cost //TODO: nacpat loss do vrsvev prez vlastnost
+            cost,
+            optimizer
         );
         
         IrisReader irisReader = new IrisReader ();
@@ -61,8 +62,9 @@ public class MLP {
         irisPerceptron.initializeWeights(123456789);
 
         // TODO:
-        // Načítání datasetu ze souboru - OK
         // Loss má teď zadrátováno že je jen pro klasifikaci, to se může zobecnit
+        int batchSize = 1;
+        int batchIter = 0;
         for (int epoch = 0; epoch < 50; epoch++) {
             int predictions = 0;
             int correctPredictions = 0;
@@ -75,10 +77,16 @@ public class MLP {
                 irisPerceptron.forwardPass ();
                 irisPerceptron.setExpectedOutput (classNumber);
                 irisPerceptron.backwardPass ();
-                irisPerceptron.adaptWeights (sgd);            
-
-                //TODO: chtělo by to vypsat error celé jedné dávky (metoda je na to připdavena v Cost)
                 
+                // pro batch > 1 zlobí Bias....u něj chyba roste geometrickou řadou. U vah je to v pohodě.
+                if (batchIter == batchSize - 1) {
+                    irisPerceptron.adaptWeights ();
+                    batchIter = 0;
+                }
+                else {
+                    batchIter++;
+                }
+
                 int predictedClassNumber = irisPerceptron.getOutputClassIndex ();
                 /*
                 System.out.println (
@@ -89,13 +97,16 @@ public class MLP {
                 );
                 */
                 
+                // TODO: chtělo by to vypsat error celé jedné dávky (metoda je na to připdavena v Cost)
+                
+                // Count the correct predictions.
                 if (predictedClassNumber == classNumber) {
                     correctPredictions++;
                 }
                 predictions++;
             }
             
-            // TODO: Chtělo by to i vyhodnocení výsledků na testovací sadě, precission, accuracy.
+            // TODO: Podrobnější statistiky (accuracy, precision, …)
             System.out.println (
                 "Correct predictions in epoch #" + epoch + ":"
                 + " " + correctPredictions + " / " + predictions
