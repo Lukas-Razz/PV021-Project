@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import cz.pv021.neuralnets.optimizers.Optimizer;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 /**
  * @author  Lukáš Daubner, Josef Plch
@@ -37,9 +39,19 @@ public class MLP {
         Cost cost = new Cost (new SquaredError(), 0.00, 0.0001);
         Optimizer optimizer = new Optimizer(0.01, new SGD());
         
-        ByteInputLayer layer0 = new ByteInputLayer ();
-        HiddenLayer    layer1 = new FullyConnectedLayer (10, new HyperbolicTangent ());
-        OutputLayer    layer2 = new OutputLayerImpl (3, new Softmax ());
+        InputLayer  layer0  = new InputLayerImpl (4);
+        HiddenLayer layer1a = new FullyConnectedLayer (10, new HyperbolicTangent ());
+        HiddenLayer layer1b = new FullyConnectedLayer (10, new HyperbolicTangent ());
+        OutputLayer layer2  = new OutputLayerImpl (3, new Softmax ());
+        
+        MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron = new MultilayerPerceptron <> (
+            layer0,
+            Arrays.asList (layer1a),
+            layer2,
+            cost,
+            optimizer
+        );
+        irisPerceptron.initializeWeights (123456789);
         
         String irisTrainFile = "./data/iris/Iris_train.data";
         Path irisTrainFilePath = FileSystems.getDefault().getPath (irisTrainFile);
@@ -47,71 +59,138 @@ public class MLP {
         List <String> trainData = Files.readAllLines (irisTrainFilePath, StandardCharsets.UTF_8);
         LOGGER.info ("Train set size: " + trainData.size ());
         
-        MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron = new MultilayerPerceptron <> (
-            new InputLayerImpl (4),
-            Arrays.asList (layer1),
-            layer2,
-            cost,
-            optimizer
-        );
-        
         IrisReader irisReader = new IrisReader ();
         // Backup version: IrisData.getData ()
         List <IrisExample> dataset = irisReader.readDataSet (trainData, true);
 
-        irisPerceptron.initializeWeights(123456789);
-
-        // TODO:
-        // Loss má teď zadrátováno že je jen pro klasifikaci, to se může zobecnit
-        int batchSize = 1;
-        int batchIter = 0;
+        DecimalFormat formatter = new DecimalFormat ("#.0");
+        DecimalFormatSymbols formatSymbols = new  DecimalFormatSymbols ();
+        formatSymbols.setDecimalSeparator ('.');
+        formatter.setDecimalFormatSymbols (formatSymbols);
+        
+        // TODO: Loss má teď zadrátováno že je jen pro klasifikaci, to se může zobecnit
+        final int bachSize = 1;
         for (int epoch = 0; epoch < 50; epoch++) {
-            int predictions = 0;
-            int correctPredictions = 0;
+            runIrisEpoch (irisPerceptron, dataset, formatter, bachSize, epoch);
+        }
+    }
+    
+    private static void runIrisEpoch (MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron, List <IrisExample> dataset, DecimalFormat formatter, int batchSize, int epoch) {
+        // Set up the confusion matrix.
+        int classes = IrisClass.values().length;
+        int[][] confusionMatrix = new int[classes][classes];
+        for (int row = 0; row < classes; row++) {
+            for (int col = 0; col < classes; col++) {
+                confusionMatrix[row][col] = 0;
+            }
+        }
+
+        int batchIter = 0;
+        for (IrisExample example : dataset) {
+            double[] attributes = example.getAttributes ();
+            int correctClassNumber = example.getIrisClass ().ordinal ();
+
+            irisPerceptron.getInputLayer ().setInput (attributes);
+            irisPerceptron.forwardPass ();
+            irisPerceptron.setExpectedOutput (correctClassNumber);
+            irisPerceptron.backwardPass ();
+
+            // pro batch > 1 zlobí Bias....u něj chyba roste geometrickou řadou. U vah je to v pohodě.
+            if (batchIter == batchSize - 1) {
+                irisPerceptron.adaptWeights ();
+                batchIter = 0;
+            }
+            else {
+                batchIter++;
+            }
+
+            int predictedClassNumber = irisPerceptron.getOutputClassIndex ();
+            confusionMatrix[correctClassNumber][predictedClassNumber]++;
+
+            // TODO: chtělo by to vypsat error celé jedné dávky (metoda je na to připdavena v Cost)
+            /*
+            System.out.println (
+                "Output in epoch #" + epoch + ":"
+                + " classWeights = " + Arrays.toString (irisPerceptron.getOutput ())
+                + ", outputClass = " + predictedClassNumber
+                + ", expectedClass = " + classNumber
+            );
+            */
+        }
+        
+        System.out.println ("=== Epoch #" + epoch + " ===");
+        String statistics = modelStatistics (confusionMatrix, formatter);
+        System.out.println (statistics);
+        System.out.println ();
+    }
+    
+    /**
+     * Show model statistics.
+     * 
+     * @param confusionMatrix It must be square matrix.
+     * @param epoch           Number of epoch.
+     * @param formatter       Formatter of decimal numbers.
+     * @return                Serialized statistics.
+     */
+    private static String modelStatistics (int[][] confusionMatrix, DecimalFormat formatter) {
+        int classes = confusionMatrix.length;
+        
+        int totalInstances = 0;
+        int correct = 0;
+        for (int x = 0; x < classes; x++) {
+            correct += confusionMatrix[x][x];
+            for (int y = 0; y < classes; y++) {
+                totalInstances += confusionMatrix[x][y];
+            }
+        }
+        double overallAccuracy = 100.0 * correct / totalInstances;
+        
+        // Overall statistics.
+        StringBuilder result = new StringBuilder ();
+        result
+            .append ("Correctly Classified Instances  \t")
+            .append (correct).append("\t").append(formatter.format (overallAccuracy)).append (" %")
+            .append ("\nIncorrectly Classified Instances\t")
+            .append (totalInstances - correct).append("\t").append(formatter.format (100 - overallAccuracy)).append (" %")
+            .append ("\nTotal Number of Instances       \t")
+            .append (totalInstances)
+            .append ("\n");
+        
+        // Confusion matrix heading.
+        IrisClass[] classArray = IrisClass.values();
+        result.append ("\nPredicted ->");
+        for (int x = 0; x < classes; x++) {
+            result.append ("\t").append (x);
+        }
+        result.append ("\tPrec.").append ("\tRecall");
+        
+        result.append ("\n--------------------------------------------------------");
+        
+        // Confusion matrix body.
+        for (int x = 0; x < classes; x++) {
+            // Class index: class name
+            result.append ("\n").append (x).append (": ").append (classArray[x].name ());
             
-            for (IrisExample example : dataset) {
-                double[] attributes = example.getAttributes ();
-                int classNumber = example.getIrisClass ().ordinal ();
-
-                irisPerceptron.getInputLayer ().setInput (attributes);
-                irisPerceptron.forwardPass ();
-                irisPerceptron.setExpectedOutput (classNumber);
-                irisPerceptron.backwardPass ();
-                
-                // pro batch > 1 zlobí Bias....u něj chyba roste geometrickou řadou. U vah je to v pohodě.
-                if (batchIter == batchSize - 1) {
-                    irisPerceptron.adaptWeights ();
-                    batchIter = 0;
-                }
-                else {
-                    batchIter++;
-                }
-
-                int predictedClassNumber = irisPerceptron.getOutputClassIndex ();
-                /*
-                System.out.println (
-                    "Output in epoch #" + epoch + ":"
-                    + " classWeights = " + Arrays.toString (irisPerceptron.getOutput ())
-                    + ", outputClass = " + predictedClassNumber
-                    + ", expectedClass = " + classNumber
-                );
-                */
-                
-                // TODO: chtělo by to vypsat error celé jedné dávky (metoda je na to připdavena v Cost)
-                
-                // Count the correct predictions.
-                if (predictedClassNumber == classNumber) {
-                    correctPredictions++;
-                }
-                predictions++;
+            int xAsX = confusionMatrix[x][x];
+            int xAsAny = 0;
+            int anyAsX = 0;
+            for (int y = 0; y < classes; y++) {
+                int xAsY = confusionMatrix[x][y];
+                int yAsX = confusionMatrix[y][x];
+                xAsAny += xAsY;
+                anyAsX += yAsX;
+                result.append ("\t").append (xAsY);
             }
             
-            // TODO: Podrobnější statistiky (accuracy, precision, …)
-            System.out.println (
-                "Correct predictions in epoch #" + epoch + ":"
-                + " " + correctPredictions + " / " + predictions
-                + " (" + (100 * 10 * correctPredictions / predictions / 10.0) + " %)"
-            );
+            // Precision = TP / (TP + FP)
+            double classPrecision = 100.0 * xAsX / anyAsX;
+            result.append ("\t").append (formatter.format (classPrecision));
+            
+            // Recall = TP / (TP + FN)
+            double classRecall = 100.0 * xAsX / xAsAny;
+            result.append("\t").append (formatter.format (classRecall));
         }
+        
+        return result.toString ();
     }
 }
