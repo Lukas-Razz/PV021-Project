@@ -5,17 +5,16 @@ import cz.pv021.neuralnets.error.*;
 import cz.pv021.neuralnets.layers.*;
 import cz.pv021.neuralnets.functions.*;
 import cz.pv021.neuralnets.network.MultilayerPerceptron;
-import cz.pv021.neuralnets.utils.Pair;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cz.pv021.neuralnets.optimizers.Optimizer;
+import java.io.IOException;
+import java.nio.file.Files;
 
 /**
  * @author  Lukáš Daubner, Josef Plch
@@ -26,6 +25,15 @@ public class MLP {
     private static final Logger LOGGER = LoggerFactory.getLogger (MLP.class);
         
     public static void main (String[] args) {
+        try {
+            testIris ();
+        }
+        catch (IOException exception) {
+            LOGGER.error ("Iris test failed.", exception);
+        }
+    }
+    
+    private static void testIris () throws IOException {
         Cost cost = new Cost (new SquaredError(), 0.00, 0.0001);
         Optimizer sgd = new SGD (0.01);
         
@@ -33,18 +41,11 @@ public class MLP {
         HiddenLayer    layer1 = new FullyConnectedLayer (10, new HyperbolicTangent (), cost.getLoss ());
         OutputLayer    layer2 = new OutputLayerImpl (3, new Softmax (), cost.getLoss ());
         
-        String irisTrainFile = "Iris_train.data";
-        
-        // ClassLoader classLoader = MLP.class.getClassLoader ();
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        LOGGER.info  ("Class loader: " + classLoader.toString ());
-        URL resource = classLoader.getResource (irisTrainFile);
-        LOGGER.info ("Resource: " + resource);
-        String irisTrainFilePath = resource.getPath();
-        LOGGER.info ("irisTrainFilePath: " + irisTrainFilePath);
-        
-        Path irisTrainFilePathB = FileSystems.getDefault().getPath(irisTrainFile);
-        LOGGER.info ("irisTrainFilePathB: " + irisTrainFilePathB);
+        String irisTrainFile = "./data/iris/Iris_train.data";
+        Path irisTrainFilePath = FileSystems.getDefault().getPath (irisTrainFile);
+        LOGGER.info ("irisTrainFilePath: " + irisTrainFilePath.toAbsolutePath ());
+        List <String> trainData = Files.readAllLines (irisTrainFilePath, StandardCharsets.UTF_8);
+        LOGGER.info ("Train set size: " + trainData.size ());
         
         MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron = new MultilayerPerceptron <> (
             new InputLayerImpl (4),
@@ -53,34 +54,53 @@ public class MLP {
             cost //TODO: nacpat loss do vrsvev prez vlastnost
         );
         
-        try {
-            IrisReader irisReader = new IrisReader ();
-            
-            List<Pair <double[], IrisClass>> dataset = irisReader.getDataSet(IrisData.getData(), true);
-            
-            irisPerceptron.initializeWeights(123456789);
-            
-            //TODO: u datasetu vyřeš to načítání ze souboru. Loss má teď zadrátováno že je jen pro klasifikaci, to se může zobecnit
-            //      chtělo by to i vyhodnocení výsledků na testovací sadě, precission, accuracy.
-            for (int epoch = 0; epoch < 50; epoch++) {
-                for (Pair<double[], IrisClass> entry : dataset) {
-                    double[] attributes = entry.getA ();
-                    int classNumber = entry.getB ().ordinal ();
+        IrisReader irisReader = new IrisReader ();
+        // Backup version: IrisData.getData ()
+        List <IrisExample> dataset = irisReader.readDataSet (trainData, true);
 
-                    irisPerceptron.getInputLayer ().setInput (attributes);
-                    irisPerceptron.forwardPass ();
-                    irisPerceptron.setExpectedOutput (classNumber);
-                    
-                    System.out.println ("Iris output: " + Arrays.toString (irisPerceptron.getOutput ()) + ", expected: " + classNumber);
-                    //TODO: chtělo by to vypsat error celé jedné dávky (metoda je na to připdavena v Cost)
-                    
-                    irisPerceptron.backwardPass ();
-                    irisPerceptron.adaptWeights (sgd);            
+        irisPerceptron.initializeWeights(123456789);
+
+        // TODO:
+        // Načítání datasetu ze souboru - OK
+        // Loss má teď zadrátováno že je jen pro klasifikaci, to se může zobecnit
+        for (int epoch = 0; epoch < 50; epoch++) {
+            int predictions = 0;
+            int correctPredictions = 0;
+            
+            for (IrisExample example : dataset) {
+                double[] attributes = example.getAttributes ();
+                int classNumber = example.getIrisClass ().ordinal ();
+
+                irisPerceptron.getInputLayer ().setInput (attributes);
+                irisPerceptron.forwardPass ();
+                irisPerceptron.setExpectedOutput (classNumber);
+                irisPerceptron.backwardPass ();
+                irisPerceptron.adaptWeights (sgd);            
+
+                //TODO: chtělo by to vypsat error celé jedné dávky (metoda je na to připdavena v Cost)
+                
+                int predictedClassNumber = irisPerceptron.getOutputClassIndex ();
+                /*
+                System.out.println (
+                    "Output in epoch #" + epoch + ":"
+                    + " classWeights = " + Arrays.toString (irisPerceptron.getOutput ())
+                    + ", outputClass = " + predictedClassNumber
+                    + ", expectedClass = " + classNumber
+                );
+                */
+                
+                if (predictedClassNumber == classNumber) {
+                    correctPredictions++;
                 }
+                predictions++;
             }
-        }
-        catch (Exception exception) {
-            LOGGER.error ("Iris test failed.", exception);
+            
+            // TODO: Chtělo by to i vyhodnocení výsledků na testovací sadě, precission, accuracy.
+            System.out.println (
+                "Correct predictions in epoch #" + epoch + ":"
+                + " " + correctPredictions + " / " + predictions
+                + " (" + (100 * 10 * correctPredictions / predictions / 10.0) + " %)"
+            );
         }
     }
 }

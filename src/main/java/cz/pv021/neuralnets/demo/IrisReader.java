@@ -9,15 +9,35 @@ import java.util.List;
 /**
  * Reader for Iris data set files.
  * 
- * @author  Josef Plch
+ * @author  Lukáš Daubner, Josef Plch
  * @since   2016-12-03
- * @version 2016-12-06
+ * @version 2016-12-08
  */
 public class IrisReader {
-    private int recordsNo = 0;
     private int attributesNo = 0;
     
-    public Pair <double[], IrisClass> readEntry (String string) {
+    public List <IrisExample> readDataSet (List <String> lines, boolean normalize) {
+        List <IrisExample> dataSet = new ArrayList <> ();
+        for (String line : lines) {
+            IrisExample example = this.readExample (line);
+            dataSet.add (example);
+        }
+        
+        if (normalize) {
+            normalize (dataSet);
+        }
+        
+        return dataSet;
+    }
+    
+    /**
+     * Read a single example. Desired format:
+     * attribute 1,attribute 2,…,attribute n,class
+     * 
+     * @param string Serialized example.
+     * @return Deserialized example.
+     */
+    public IrisExample readExample (String string) {
         String[] columns = string.split (",");
         attributesNo = columns.length - 1;
 
@@ -28,29 +48,31 @@ public class IrisReader {
 
         IrisClass irisClass = IrisClass.read (columns [attributesNo]);
         
-        return new Pair <> (attributes, irisClass);
+        return new IrisExample (attributes, irisClass);
     }
     
-    public List<Pair<double[], IrisClass>> getDataSet(List<String> data, boolean normalize) {
-        List<Pair<double[], IrisClass>> list = new ArrayList<>();
-        for (String line : data) {
-            Pair <double[], IrisClass> entry = this.readEntry (line);
-            list.add(entry);
-            recordsNo++;
-        }
-        if(normalize) {
-            for(int i = 0; i<attributesNo; i++) {
-                double max = Double.MIN_VALUE;
-                double min = Double.MAX_VALUE;
-                for(int j = 0; j<list.size(); j++) {
-                    max = max(list.get(j).getA()[i], max);
-                    min = min(list.get(j).getA()[i], min);
-                }
-                for(int j = 0; j<list.size(); j++) {
-                    list.get(j).getA()[i] = 2/(max-min) * (list.get(j).getA()[i] - ((min+max)/2));
-                }
+    /**
+     * Shift the attribute ranges to interval <-1, 1>.
+     * 
+     * @param dataSet The data set to be modified.
+     */
+    public void normalize (List <IrisExample> dataSet) {
+        for (int att = 0; att < attributesNo; att++) {
+            double max = Double.MIN_VALUE;
+            double min = Double.MAX_VALUE;
+            for (int j = 0; j < dataSet.size(); j++) {
+                double value = dataSet.get(j).getAttributes()[att];
+                max = max (value, max);
+                min = min (value, min);
+            }
+            double middle = (min + max) / 2;
+
+            // Shift the values to interval <-1, 1>.
+            for (int j = 0; j < dataSet.size(); j++) {
+                double oldValue = dataSet.get(j).getAttributes()[att];
+                double newValue = 2 * (oldValue - middle) / (max - min);
+                dataSet.get(j).getAttributes()[att] = newValue;
             }
         }
-        return list;
     }
 }
