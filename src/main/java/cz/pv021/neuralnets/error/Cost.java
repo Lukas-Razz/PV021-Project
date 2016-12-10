@@ -37,8 +37,9 @@ public class Cost {
         for(OutputExample example : batch) {
             for (int i=0; i<example.getActualOutput().length; i++) {
                 //pouze pro klasifikaci
-                if(i == example.getExpectedOutput())
+                if(i == example.getExpectedOutput()) {
                     lossSum += loss.loss(example.getActualOutput()[i], 1);
+                }
                 else
                     lossSum += loss.loss(example.getActualOutput()[i], 0);
             }

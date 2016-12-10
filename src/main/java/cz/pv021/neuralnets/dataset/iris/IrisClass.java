@@ -1,4 +1,4 @@
-package cz.pv021.neuralnets.demo;
+package cz.pv021.neuralnets.dataset.iris;
 
 import java.util.Objects;
 
@@ -7,7 +7,7 @@ import java.util.Objects;
  * 
  * @author  Josef Plch
  * @since   2016-12-03
- * @version 2016-12-04
+ * @version 2016-12-10
  */
 public enum IrisClass {
     SETOSA ("Iris-setosa"),

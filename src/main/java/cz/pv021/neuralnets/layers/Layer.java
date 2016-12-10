@@ -11,5 +11,7 @@ public interface Layer {
     public int getNumberOfUnits ();
     
     public double [] getOutput ();
+    
+    //public int getId();
 }
 

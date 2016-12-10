@@ -11,7 +11,7 @@ public class SquaredError implements Loss {
 
     @Override
     public double loss(double actual, double expected) {
-        return (1/2)*Math.pow((expected - actual), 2);
+        return Math.pow((expected - actual), 2)/2;
     }
 
     @Override

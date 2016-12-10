@@ -1,4 +1,4 @@
-package cz.pv021.neuralnets.demo;
+package cz.pv021.neuralnets.dataset.iris;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import java.util.List;
  * 
  * @author  Lukáš Daubner
  * @since   2016-12-06
- * @version 2016-12-07
+ * @version 2016-12-10
  */
 public class IrisData {
     public static List<String> getData() {

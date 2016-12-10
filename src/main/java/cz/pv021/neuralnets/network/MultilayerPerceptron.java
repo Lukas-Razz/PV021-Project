@@ -9,6 +9,8 @@ import cz.pv021.neuralnets.layers.OutputLayer;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.List;
 import cz.pv021.neuralnets.optimizers.Optimizer;
+import cz.pv021.neuralnets.utils.OutputExample;
+import java.util.ArrayList;
 
 /**
  * @param <IL> Type of the input layer.
@@ -16,7 +18,7 @@ import cz.pv021.neuralnets.optimizers.Optimizer;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-17
- * @version 2016-12-08
+ * @version 2016-12-10
  */
 public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer> implements Network {
     private final IL inputLayer;
@@ -113,5 +115,18 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
     // Delegate method.
     public void setInput (double[] input) {
         inputLayer.setInput (input);
+    }
+    
+    public List<LayerParameters> getParameters() {
+        List<LayerParameters> parameters = new ArrayList<>();
+        for(LayerWithInput layer : hiddenLayers) {
+            parameters.add(layer.getParameters());
+        }
+        parameters.add(outputLayer.getParameters());
+        return parameters;
+    }
+    
+    public double getBatchError(List<OutputExample> batchOutput) {
+        return cost.getBatchError(batchOutput, getParameters());
     }
 }
