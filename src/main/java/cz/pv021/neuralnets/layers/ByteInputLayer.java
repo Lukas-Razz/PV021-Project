@@ -3,7 +3,7 @@ package cz.pv021.neuralnets.layers;
 /**
  * @author  Josef Plch
  * @since   2016-11-21
- * @version 2016-11-21
+ * @version 2016-12-12
  */
 public class ByteInputLayer implements InputLayer {
     private static final int BYTE_SIZE = 8;
@@ -28,6 +28,11 @@ public class ByteInputLayer implements InputLayer {
             input [i] = boolToDouble (getBit (byte8, i));
         }
         this.delegate.setInput (input);
+    }
+    
+    @Override
+    public LayerWithInput getLowerLayer () {
+        return this.delegate.getLowerLayer ();
     }
     
     @Override

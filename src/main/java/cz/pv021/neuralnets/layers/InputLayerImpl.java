@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-11-21
+ * @version 2016-12-12
  */
 public class InputLayerImpl implements InputLayer {
     final Logger logger = LoggerFactory.getLogger (InputLayerImpl.class);
@@ -21,6 +21,11 @@ public class InputLayerImpl implements InputLayer {
         this.output = new double[numberOfUnits];
     }
 
+    @Override
+    public LayerWithInput getLowerLayer () {
+        return lowerLayer;
+    }
+    
     @Override
     public int getNumberOfUnits () {
         return numberOfUnits;

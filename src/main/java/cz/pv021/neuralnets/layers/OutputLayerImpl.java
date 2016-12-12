@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-07
+ * @version 2016-12-12
  */
 public class OutputLayerImpl implements OutputLayer {
     final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
@@ -23,7 +23,7 @@ public class OutputLayerImpl implements OutputLayer {
     private Loss loss;
     private final OutputFunction outputFunction;
     private final int numberOfUnits;
-    private Layer upperLayer; // Vstupni
+    private LayerWithOutput upperLayer; // Vstupni
     private double[][] weights;
     private double[] bias;
     
@@ -91,6 +91,11 @@ public class OutputLayerImpl implements OutputLayer {
         return output;
     }
 
+    @Override
+    public LayerWithOutput getUpperLayer () {
+        return upperLayer;
+    }
+    
     @Override
     public void initializeWeights (long seed) {
         Random r = new Random (seed);

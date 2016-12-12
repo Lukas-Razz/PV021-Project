@@ -8,7 +8,7 @@ import java.util.List;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-08
- * @version 2016-12-06
+ * @version 2016-12-11
  */
 public interface LayerWithInput extends Layer {
     /**
@@ -21,13 +21,15 @@ public interface LayerWithInput extends Layer {
      */
     public void forwardPass ();
     
-    public void initializeWeights (long seed);
+    public List<LayerParameters> getErrors ();
     
     public double[] getInnerPotentialGradient ();
     
     public LayerParameters getParameters ();
     
-    public List<LayerParameters> getErrors ();
+    public LayerWithOutput getUpperLayer ();
+    
+    public void initializeWeights (long seed);
     
     public void resetGradients();
     

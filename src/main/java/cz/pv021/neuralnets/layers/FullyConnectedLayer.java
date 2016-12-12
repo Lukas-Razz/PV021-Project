@@ -16,13 +16,13 @@ import org.slf4j.LoggerFactory;
  * @version 2016-12-07
  */
 public class FullyConnectedLayer implements HiddenLayer {
-    final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
+    private final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
     
     private final ActivationFunction activationFunction;
     private LayerWithInput lowerLayer; // Vystupni
     private LayerWithOutput upperLayer; // Vstupni
     private final int numberOfUnits;
-    private final double[] output;
+    private double[] output;
     private double[][] weights;
     private double[] bias;
     
@@ -77,6 +77,11 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     @Override
+    public LayerWithInput getLowerLayer () {
+        return lowerLayer;
+    }
+    
+    @Override
     public int getNumberOfUnits () {
         return numberOfUnits;
     }
@@ -85,7 +90,12 @@ public class FullyConnectedLayer implements HiddenLayer {
     public double[] getOutput () {
         return output;
     }
-
+    
+    @Override
+    public LayerWithOutput getUpperLayer () {
+        return upperLayer;
+    }
+    
     @Override
     public void initializeWeights (long seed) {
         Random r = new Random (seed);
@@ -139,5 +149,61 @@ public class FullyConnectedLayer implements HiddenLayer {
     public void resetGradients() {
         biasErrors.clear();
         weightErrors.clear();
+    }
+    
+    protected ActivationFunction getActivationFunction () {
+        return activationFunction;
+    }
+    
+    protected double[] getBias () {
+        return bias;
+    }
+    
+    protected List <double[]> getBiasErrors () {
+        return biasErrors;
+    }
+    
+    protected double[] getErrWrtInnerP () {
+        return err_wrt_innerP;
+    }
+    
+    protected double[] getInnerPotentials () {
+        return innerPotencials;
+    }
+    
+    protected List <double[][]> getWeightErrors () {
+        return weightErrors;
+    }
+    
+    protected double[][] getWeights () {
+        return weights;
+    }
+    
+    protected void setBias (double[] bias) {
+        this.bias = bias;
+    }
+    
+    protected void setBiasErrors (List <double[]> biasErrors) {
+        this.biasErrors = biasErrors;
+    }
+    
+    protected void setErrWrtInnerP (double[] errWrtInnerP) {
+        this.err_wrt_innerP = errWrtInnerP;
+    }
+    
+    protected void setInnerPotentials (double[] innerPotentials) {
+        this.innerPotencials = innerPotentials;
+    }
+    
+    protected void setOutput (double[] output) {
+        this.output = output;
+    }
+    
+    protected void setWeightErrors (List <double[][]> weightErrors) {
+        this.weightErrors = weightErrors;
+    }
+    
+    protected void setWeights (double[][] weights) {
+        this.weights = weights;
     }
 }
