@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A recursive layer, i.e. layer with self-loops.
  * 
+ * TODO: Rename (there is a missing T in the class name).
+ * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-10-30
  * @version 2016-12-12
@@ -65,15 +67,6 @@ public class FullyConnecedRecursiveLayer extends FullyConnectedLayer implements 
     @Override
     public void backwardPass () {
         throw new UnsupportedOperationException ("Not supported! Use backpropagation on unfolded network.");
-    }
-    
-    // Scalar product, aka dot product.
-    private double dot (double[] vectorA, double[] vectorB) {
-        double result = 0;
-        for (int i = 0; i < vectorA.length; i++) {
-            result += vectorA[i] * vectorB[i];
-        }
-        return result;
     }
     
     @Override

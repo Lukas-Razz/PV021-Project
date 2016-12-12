@@ -151,59 +151,60 @@ public class FullyConnectedLayer implements HiddenLayer {
         weightErrors.clear();
     }
     
-    protected ActivationFunction getActivationFunction () {
+    @Override
+    public ActivationFunction getActivationFunction () {
         return activationFunction;
     }
     
-    protected double[] getBias () {
+    public double[] getBias () {
         return bias;
     }
     
-    protected List <double[]> getBiasErrors () {
+    public List <double[]> getBiasErrors () {
         return biasErrors;
     }
     
-    protected double[] getErrWrtInnerP () {
+    public double[] getErrWrtInnerP () {
         return err_wrt_innerP;
     }
     
-    protected double[] getInnerPotentials () {
+    public double[] getInnerPotentials () {
         return innerPotencials;
     }
     
-    protected List <double[][]> getWeightErrors () {
+    public List <double[][]> getWeightErrors () {
         return weightErrors;
     }
     
-    protected double[][] getWeights () {
+    public double[][] getWeights () {
         return weights;
     }
     
-    protected void setBias (double[] bias) {
+    public void setBias (double[] bias) {
         this.bias = bias;
     }
     
-    protected void setBiasErrors (List <double[]> biasErrors) {
+    public void setBiasErrors (List <double[]> biasErrors) {
         this.biasErrors = biasErrors;
     }
     
-    protected void setErrWrtInnerP (double[] errWrtInnerP) {
+    public void setErrWrtInnerP (double[] errWrtInnerP) {
         this.err_wrt_innerP = errWrtInnerP;
     }
     
-    protected void setInnerPotentials (double[] innerPotentials) {
+    public void setInnerPotentials (double[] innerPotentials) {
         this.innerPotencials = innerPotentials;
     }
     
-    protected void setOutput (double[] output) {
+    public void setOutput (double[] output) {
         this.output = output;
     }
     
-    protected void setWeightErrors (List <double[][]> weightErrors) {
+    public void setWeightErrors (List <double[][]> weightErrors) {
         this.weightErrors = weightErrors;
     }
     
-    protected void setWeights (double[][] weights) {
+    public void setWeights (double[][] weights) {
         this.weights = weights;
     }
 }

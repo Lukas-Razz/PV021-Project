@@ -1,5 +1,6 @@
 package cz.pv021.neuralnets.layers;
 
+import cz.pv021.neuralnets.functions.HyperbolicTangent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,8 +18,12 @@ public class InputMergeLayer extends FullyConnectedLayer {
     private final int sizeA;
     private final int sizeB;
     
+    // TODO: Activation function.
     public InputMergeLayer (LayerWithOutput layerA, LayerWithOutput layerB) {
-        super (layerA.getNumberOfUnits () + layerB.getNumberOfUnits (), null);
+        super (
+            layerA.getNumberOfUnits () + layerB.getNumberOfUnits (),
+            new HyperbolicTangent ()
+        );
         this.inputLayerA = layerA;
         this.inputLayerB = layerB;
         this.sizeA = layerA.getNumberOfUnits ();
@@ -44,23 +49,23 @@ public class InputMergeLayer extends FullyConnectedLayer {
         if (inputLayerA instanceof FullyConnectedLayer) {
             FullyConnectedLayer layerA = (FullyConnectedLayer) inputLayerA;
             layerA.setBias (partA (this.getBias ()));
-            layerA.setBiasErrors (partA (this.getBiasErrors ()));
+            //layerA.setBiasErrors (partA (this.getBiasErrors ()));
             layerA.setErrWrtInnerP (partA (this.getErrWrtInnerP ()));
             layerA.setInnerPotentials (partA (this.getInnerPotentials ()));
             layerA.setOutput (partA (this.getOutput ()));
-            layerA.setWeightErrors (partA (this.getWeightErrors ()));
+            //layerA.setWeightErrors (partA (this.getWeightErrors ()));
             layerA.setWeights (partA (this.getWeights ()));
         }
         
         if (inputLayerB instanceof FullyConnectedLayer) {
             FullyConnectedLayer layerB = (FullyConnectedLayer) inputLayerB;
-            layerB.setBias (partA (this.getBias ()));
-            layerB.setBiasErrors (partA (this.getBiasErrors ()));
-            layerB.setErrWrtInnerP (partA (this.getErrWrtInnerP ()));
-            layerB.setInnerPotentials (partA (this.getInnerPotentials ()));
-            layerB.setOutput (partA (this.getOutput ()));
-            layerB.setWeightErrors (partA (this.getWeightErrors ()));
-            layerB.setWeights (partA (this.getWeights ()));
+            layerB.setBias (partB (this.getBias ()));
+            //layerB.setBiasErrors (partB (this.getBiasErrors ()));
+            layerB.setErrWrtInnerP (partB (this.getErrWrtInnerP ()));
+            layerB.setInnerPotentials (partB (this.getInnerPotentials ()));
+            layerB.setOutput (partB (this.getOutput ()));
+            //layerB.setWeightErrors (partB (this.getWeightErrors ()));
+            layerB.setWeights (partB (this.getWeights ()));
         }
     }
     
@@ -96,14 +101,14 @@ public class InputMergeLayer extends FullyConnectedLayer {
             this.setWeights (merge (
                 layerA.getWeights (),
                 layerB.getWeights ()
-            ));            
+            ));
         }
     }
     
     @Override
     public void forwardPass () {
         copyAttributesFromChildren ();
-        super.backwardPass ();
+        super.forwardPass ();
         copyAttributesToChildren ();
     }
     
@@ -116,7 +121,14 @@ public class InputMergeLayer extends FullyConnectedLayer {
     
     private double[][] merge (double[][] a, double[][] b) {
         if (a[0].length != b[0].length) {
-            throw new IllegalArgumentException ("Array shapes differ.");
+            int x1 = a[0].length;
+            int x2 = b[0].length;
+            int y1 = a.length;
+            int y2 = b.length;
+            throw new IllegalArgumentException (
+                "Array shapes differ: "
+                + x1 + "*" + y1 + " vs " + x2 + "*" + y2
+            );
         }
         double[][] merged = new double[a.length + b.length][a[0].length];
         System.arraycopy (a, 0, merged, 0,        a.length);

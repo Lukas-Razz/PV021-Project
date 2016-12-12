@@ -1,5 +1,7 @@
 package cz.pv021.neuralnets.layers;
 
+import java.util.Arrays;
+
 /**
  * @author  Josef Plch
  * @since   2016-11-21
@@ -17,7 +19,15 @@ public class ByteInputLayer implements InputLayer {
     public void setInput (double[] input) {
         this.delegate.setInput (input);
     }
-
+    
+    public static double[] byteToDoubleArray (byte byte8) {
+        double[] array = new double[256];
+        Arrays.fill (array, 0.0);
+        int intValue = byte8 & 0xFF;
+        array[intValue] = 1;
+        return array;
+    }
+    
     private static boolean getBit (byte byte8, int bitIndex) {
         return (byte8 >> bitIndex & 1) == 1;
     }

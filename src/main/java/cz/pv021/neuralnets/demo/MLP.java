@@ -2,7 +2,6 @@ package cz.pv021.neuralnets.demo;
 
 import cz.pv021.neuralnets.dataset.DataSet;
 import cz.pv021.neuralnets.dataset.Example;
-import cz.pv021.neuralnets.dataset.iris.IrisExample;
 import cz.pv021.neuralnets.dataset.iris.IrisReader;
 import cz.pv021.neuralnets.dataset.iris.IrisClass;
 import cz.pv021.neuralnets.optimizers.SGD;
@@ -10,6 +9,7 @@ import cz.pv021.neuralnets.error.*;
 import cz.pv021.neuralnets.layers.*;
 import cz.pv021.neuralnets.functions.*;
 import cz.pv021.neuralnets.network.MultilayerPerceptron;
+import cz.pv021.neuralnets.network.RecurrentNetwork;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * @author  Lukáš Daubner, Josef Plch
@@ -36,6 +37,7 @@ public class MLP {
     public static void main (String[] args) {
         try {
             testIris ();
+            testSentences ();
         }
         catch (IOException exception) {
             LOGGER.error ("Iris test failed.", exception);
@@ -253,5 +255,62 @@ public class MLP {
         }
         
         return result.toString ();
+    }
+    
+    private static void testSentences () throws IOException {
+        double learningRate = 0.01;
+        double l1 = 0.00;
+        double l2 = 0.0001;
+        
+        Cost cost = new Cost (new SquaredError(), l1, l2);
+        Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
+        
+        ByteInputLayer layer0  = new ByteInputLayer ();
+        HiddenLayer    layer1a = new FullyConnecedRecursiveLayer (10, new HyperbolicTangent());
+        HiddenLayer    layer1b = new FullyConnectedLayer (10, new HyperbolicTangent());
+        OutputLayer    layer2  = new OutputLayerImpl (3, new Softmax ());
+        
+        RecurrentNetwork <ByteInputLayer, OutputLayer> irisPerceptron = new RecurrentNetwork <> (
+            layer0,
+            Arrays.asList (layer1a),
+            layer2,
+            cost,
+            optimizer
+        );
+        irisPerceptron.initializeWeights (123456789);
+        
+        String csDataPath = "./data/language_identification/cs_sentences.txt";
+        Path csDataFilePath = FileSystems.getDefault().getPath (csDataPath);
+        LOGGER.info ("irisTrainFilePath: " + csDataFilePath.toAbsolutePath ());
+        List <String> csSentences = Files.readAllLines (csDataFilePath, StandardCharsets.UTF_8);
+        LOGGER.info ("Train set size: " + csSentences.size ());
+
+        int classes = 2;
+        int[][] confusionMatrix = new int[classes][classes];
+        for (int row = 0; row < classes; row++) {
+            for (int col = 0; col < classes; col++) {
+                confusionMatrix[row][col] = 0;
+            }
+        }
+         
+        for (String csSentence : csSentences) {
+            byte[] bytes = csSentence.getBytes (StandardCharsets.UTF_8);
+            List <double[]> attributeSequence = new LinkedList <> ();
+            for (byte byte8 : bytes) {
+                attributeSequence.add (ByteInputLayer.byteToDoubleArray (byte8));
+            }
+            int csClassNumber = 0;
+            
+            irisPerceptron.backpropagationThroughTime (attributeSequence, csClassNumber);
+            int predictedClassNumber = irisPerceptron.getOutputClassIndex ();
+            confusionMatrix[csClassNumber][predictedClassNumber]++;
+
+            System.out.println (
+                "Output in epoch #" + "?" + ":"
+                + " classWeights = " + Arrays.toString (irisPerceptron.getOutput ())
+                + ", outputClass = " + predictedClassNumber
+                + ", expectedClass = " + csClassNumber
+            );
+        }
     }
 }
