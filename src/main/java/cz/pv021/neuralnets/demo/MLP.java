@@ -9,7 +9,6 @@ import cz.pv021.neuralnets.error.*;
 import cz.pv021.neuralnets.layers.*;
 import cz.pv021.neuralnets.functions.*;
 import cz.pv021.neuralnets.network.MultilayerPerceptron;
-import cz.pv021.neuralnets.network.RecurrentNetwork;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -18,13 +17,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cz.pv021.neuralnets.optimizers.Optimizer;
+import cz.pv021.neuralnets.utils.ModelStatistics;
 import cz.pv021.neuralnets.utils.OutputExample;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 /**
  * @author  Lukáš Daubner, Josef Plch
@@ -37,7 +34,6 @@ public class MLP {
     public static void main (String[] args) {
         try {
             testIris ();
-            testSentences ();
         }
         catch (IOException exception) {
             LOGGER.error ("Iris test failed.", exception);
@@ -83,22 +79,17 @@ public class MLP {
         DataSet dataSet = new DataSet(irisReader.readDataSet (trainData), irisReader.readDataSet (testData));
         dataSet.normalizeToMinusOnePlusOne();
         
-        DecimalFormat formatter = new DecimalFormat ("#.0");
-        DecimalFormatSymbols formatSymbols = new  DecimalFormatSymbols ();
-        formatSymbols.setDecimalSeparator ('.');
-        formatter.setDecimalFormatSymbols (formatSymbols);
-        
         // TODO: Loss má teď zadrátováno že je jen pro klasifikaci, to se může zobecnit
         final int bachSize = 1;
         List<List<Example>> batches = dataSet.splitToBatch(bachSize);
         for (int epoch = 0; epoch < 50; epoch++) {
-            runIrisEpoch (irisPerceptron, batches, formatter, epoch);
+            runIrisEpoch (irisPerceptron, batches, epoch);
         }
         
-        testIris(irisPerceptron, dataSet.getTestSet(), formatter);
+        testIris (irisPerceptron, dataSet.getTestSet ());
     }
     
-    private static void runIrisEpoch (MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron, List<List<Example>> batches, DecimalFormat formatter, int epoch) {
+    private static void runIrisEpoch (MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron, List<List<Example>> batches, int epoch) {
         // Set up the confusion matrix.
         int classes = IrisClass.values().length;
         int[][] confusionMatrix = new int[classes][classes];
@@ -113,7 +104,7 @@ public class MLP {
             List<OutputExample> batchOutput = new ArrayList<>();
             for (Example example : batch) {
                 double[] attributes = example.getAttributes ();
-                int correctClassNumber = example.getIrisClass ().ordinal ();
+                int correctClassNumber = example.getExampleClass ().getIndex ();
 
                 irisPerceptron.getInputLayer ().setInput (attributes);
                 irisPerceptron.forwardPass ();
@@ -140,17 +131,10 @@ public class MLP {
         }
         error = error / batches.size();
         
-        System.out.println ("=== Epoch #" + epoch + " ===");
-        System.out.println ("Average error: " + error);
-        System.out.println ();
-        /*
-        String statistics = modelStatistics (confusionMatrix, formatter);
-        System.out.println (statistics);
-        System.out.println ();
-        */
+        System.out.println ("Epoch #" + epoch + ": average error = " + error);
     }
     
-     private static void testIris (MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron, List<Example> testSet, DecimalFormat formatter) {
+     private static void testIris (MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron, List<Example> testSet) {
         // Set up the confusion matrix.
         int classes = IrisClass.values().length;
         int[][] confusionMatrix = new int[classes][classes];
@@ -162,7 +146,7 @@ public class MLP {
          
         for (Example example : testSet) {
             double[] attributes = example.getAttributes ();
-            int correctClassNumber = example.getIrisClass ().ordinal ();
+            int correctClassNumber = example.getExampleClass ().getIndex ();
 
             irisPerceptron.getInputLayer ().setInput (attributes);
             irisPerceptron.forwardPass ();
@@ -181,136 +165,10 @@ public class MLP {
             */
         }
         
+        System.out.println ();
         System.out.println ("=== Model test results ===");
-        String statistics = modelStatistics (confusionMatrix, formatter);
+        String statistics = ModelStatistics.modelStatistics (confusionMatrix, IrisClass.values ());
         System.out.println (statistics);
         System.out.println ();
      }
-    
-    /**
-     * Show model statistics.
-     * 
-     * @param confusionMatrix It must be square matrix.
-     * @param epoch           Number of epoch.
-     * @param formatter       Formatter of decimal numbers.
-     * @return                Serialized statistics.
-     */
-    private static String modelStatistics (int[][] confusionMatrix, DecimalFormat formatter) {
-        int classes = confusionMatrix.length;
-        
-        int totalInstances = 0;
-        int correct = 0;
-        for (int x = 0; x < classes; x++) {
-            correct += confusionMatrix[x][x];
-            for (int y = 0; y < classes; y++) {
-                totalInstances += confusionMatrix[x][y];
-            }
-        }
-        double overallAccuracy = 100.0 * correct / totalInstances;
-        
-        // Overall statistics.
-        StringBuilder result = new StringBuilder ();
-        result
-            .append ("Correctly Classified Instances  \t")
-            .append (correct).append("\t").append(formatter.format (overallAccuracy)).append (" %")
-            .append ("\nIncorrectly Classified Instances\t")
-            .append (totalInstances - correct).append("\t").append(formatter.format (100 - overallAccuracy)).append (" %")
-            .append ("\nTotal Number of Instances       \t")
-            .append (totalInstances)
-            .append ("\n");
-        
-        // Confusion matrix heading.
-        IrisClass[] classArray = IrisClass.values();
-        result.append ("\nPredicted ->");
-        for (int x = 0; x < classes; x++) {
-            result.append ("\t").append (x);
-        }
-        result.append ("\tPrec.").append ("\tRecall");
-        
-        result.append ("\n--------------------------------------------------------");
-        
-        // Confusion matrix body.
-        for (int x = 0; x < classes; x++) {
-            // Class index: class name
-            result.append ("\n").append (x).append (": ").append (classArray[x].name ());
-            
-            int xAsX = confusionMatrix[x][x];
-            int xAsAny = 0;
-            int anyAsX = 0;
-            for (int y = 0; y < classes; y++) {
-                int xAsY = confusionMatrix[x][y];
-                int yAsX = confusionMatrix[y][x];
-                xAsAny += xAsY;
-                anyAsX += yAsX;
-                result.append ("\t").append (xAsY);
-            }
-            
-            // Precision = TP / (TP + FP)
-            double classPrecision = 100.0 * xAsX / anyAsX;
-            result.append ("\t").append (formatter.format (classPrecision));
-            
-            // Recall = TP / (TP + FN)
-            double classRecall = 100.0 * xAsX / xAsAny;
-            result.append("\t").append (formatter.format (classRecall));
-        }
-        
-        return result.toString ();
-    }
-    
-    private static void testSentences () throws IOException {
-        double learningRate = 0.01;
-        double l1 = 0.00;
-        double l2 = 0.0001;
-        
-        Cost cost = new Cost (new SquaredError(), l1, l2);
-        Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
-        
-        InputLayer  layer0  = new InputLayerImpl (256);
-        HiddenLayer layer1a = new FullyConnecedRecursiveLayer (1, new HyperbolicTangent());
-        // HiddenLayer layer1b = new FullyConnectedLayer (10, new HyperbolicTangent());
-        OutputLayer layer2  = new OutputLayerImpl (10, new Softmax ());
-        
-        RecurrentNetwork <InputLayer, OutputLayer> irisPerceptron = new RecurrentNetwork <> (
-            layer0,
-            Arrays.asList (layer1a),
-            layer2,
-            cost,
-            optimizer
-        );
-        irisPerceptron.initializeWeights (123456789);
-        
-        String csDataPath = "./data/language_identification/cs_sentences.txt";
-        Path csDataFilePath = FileSystems.getDefault().getPath (csDataPath);
-        LOGGER.info ("irisTrainFilePath: " + csDataFilePath.toAbsolutePath ());
-        List <String> csSentences = Files.readAllLines (csDataFilePath, StandardCharsets.UTF_8);
-        LOGGER.info ("Train set size: " + csSentences.size ());
-
-        int classes = 2;
-        int[][] confusionMatrix = new int[classes][classes];
-        for (int row = 0; row < classes; row++) {
-            for (int col = 0; col < classes; col++) {
-                confusionMatrix[row][col] = 0;
-            }
-        }
-         
-        for (String csSentence : csSentences) {
-            byte[] bytes = csSentence.getBytes (StandardCharsets.UTF_8);
-            List <double[]> attributeSequence = new LinkedList <> ();
-            for (byte byte8 : bytes) {
-                attributeSequence.add (ByteInputLayer.byteToDoubleArray (byte8));
-            }
-            int csClassNumber = 0;
-            
-            irisPerceptron.backpropagationThroughTime (attributeSequence, csClassNumber);
-            int predictedClassNumber = irisPerceptron.getOutputClassIndex ();
-            confusionMatrix[csClassNumber][predictedClassNumber]++;
-
-            System.out.println (
-                "Output in epoch #" + "?" + ":"
-                + " classWeights = " + Arrays.toString (irisPerceptron.getOutput ())
-                + ", outputClass = " + predictedClassNumber
-                + ", expectedClass = " + csClassNumber
-            );
-        }
-    }
 }

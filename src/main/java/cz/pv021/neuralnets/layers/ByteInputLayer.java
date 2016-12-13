@@ -1,6 +1,6 @@
 package cz.pv021.neuralnets.layers;
 
-import java.util.Arrays;
+import cz.pv021.neuralnets.utils.ByteUtils;
 
 /**
  * @author  Josef Plch
@@ -20,34 +20,22 @@ public class ByteInputLayer implements InputLayer {
         this.delegate.setInput (input);
     }
     
-    public static double[] byteToDoubleArray (byte byte8) {
-        double[] array = new double[256];
-        Arrays.fill (array, 0.0);
-        int intValue = byte8 & 0xFF;
-        array[intValue] = 1;
-        return array;
-    }
-    
-    private static boolean getBit (byte byte8, int bitIndex) {
-        return (byte8 >> bitIndex & 1) == 1;
-    }
-    
     public void setInputByte (byte byte8) {
         double [] input = new double [BYTE_SIZE];
         for (int i = 0; i < BYTE_SIZE; i++) {
-            input [i] = boolToDouble (getBit (byte8, i));
+            input [i] = boolToDouble (ByteUtils.getBit (byte8, i));
         }
         this.delegate.setInput (input);
     }
     
     @Override
-    public LayerWithInput getLowerLayer () {
-        return this.delegate.getLowerLayer ();
+    public LayerWithInput getOutputLayer () {
+        return this.delegate.getOutputLayer ();
     }
     
     @Override
-    public void setLowerLayer (LayerWithInput layer) {
-        this.delegate.setLowerLayer (layer);
+    public void setOutputLayer (LayerWithInput layer) {
+        this.delegate.setOutputLayer (layer);
     }
 
     @Override

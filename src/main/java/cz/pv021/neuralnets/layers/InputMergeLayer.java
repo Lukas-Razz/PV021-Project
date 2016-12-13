@@ -177,9 +177,9 @@ public class InputMergeLayer extends FullyConnectedLayer {
     }
     
     @Override
-    public void setLowerLayer (LayerWithInput layer) {
-        super.setLowerLayer (layer);
-        inputLayerA.setLowerLayer (layer);
-        inputLayerB.setLowerLayer (layer);
+    public void setOutputLayer (LayerWithInput layer) {
+        super.setOutputLayer (layer);
+        inputLayerA.setOutputLayer (layer);
+        inputLayerB.setOutputLayer (layer);
     }
 }

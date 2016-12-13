@@ -1,22 +1,23 @@
 package cz.pv021.neuralnets.dataset.iris;
 
+import cz.pv021.neuralnets.dataset.DataClass;
 import cz.pv021.neuralnets.dataset.Example;
 import cz.pv021.neuralnets.utils.Pair;
 
 /**
  * @author  Josef Plch
  * @since   2016-12-08
- * @version 2016-12-10
+ * @version 2016-12-13
  */
-public class IrisExample extends Pair <double[], IrisClass> implements Example {
-    public IrisExample (double[] attributes, IrisClass irisClass) {
-        super (attributes, irisClass);
+public class IrisExample extends Pair <double[], DataClass> implements Example {
+    public IrisExample (double[] attributes, DataClass exampleClass) {
+        super (attributes, exampleClass);
     }
     
     /**
      * Use getAttributes() instead.
      * 
-     * @return Attributes.
+     * @return Example attributes.
      */
     @Deprecated
     @Override
@@ -30,18 +31,18 @@ public class IrisExample extends Pair <double[], IrisClass> implements Example {
     }
     
     /**
-     * Use getIrisClass() instead.
+     * Use getDataClass() instead.
      * 
-     * @return Iris class.
+     * @return Example class.
      */
     @Deprecated
     @Override
-    public IrisClass getB () {
+    public DataClass getB () {
         return super.getB ();
     }
     
     @Override
-    public IrisClass getIrisClass () {
+    public DataClass getExampleClass () {
         return super.getB ();
     }
 }

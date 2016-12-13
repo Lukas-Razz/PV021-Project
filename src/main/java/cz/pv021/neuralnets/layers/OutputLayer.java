@@ -5,9 +5,9 @@ import cz.pv021.neuralnets.error.Loss;
 /**
  * Output layer interface.
  * 
- * @author  Josef Plch
+ * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-08
- * @version 2016-12-08
+ * @version 2016-12-13
  */
 
 public interface OutputLayer extends LayerWithInput {
@@ -31,6 +31,7 @@ public interface OutputLayer extends LayerWithInput {
         
         return bestClassIndex;
     }
+    
     public void setExpectedOutput (double expectedOutput);
     
     public void setLoss (Loss loss);

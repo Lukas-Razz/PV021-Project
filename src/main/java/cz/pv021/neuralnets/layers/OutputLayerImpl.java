@@ -4,7 +4,6 @@ import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.OutputFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -15,24 +14,21 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-12
+ * @version 2016-12-13
  */
 public class OutputLayerImpl implements OutputLayer {
     final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
-    
     private Loss loss;
     private final OutputFunction outputFunction;
     private final int numberOfUnits;
-    private LayerWithOutput upperLayer; // Vstupni
+    private LayerWithOutput inputLayer;
     private double[][] weights;
     private double[] bias;
-    
     private double[] innerPotentials;
+    // Error with respect to inner potentials = inner potential gradient.
     private double[] err_wrt_innerP;
-    
     private List<double[][]> weightErrors;
     private List<double[]> biasErrors;
-       
     private double[] output;
     private double expectedOutput;
 
@@ -52,15 +48,15 @@ public class OutputLayerImpl implements OutputLayer {
     
     @Override
     public void backwardPass () {
-        double[][] err_wrt_weight = new double[numberOfUnits][upperLayer.getNumberOfUnits()];
+        double[][] err_wrt_weight = new double[numberOfUnits][inputLayer.getNumberOfUnits()];
         double[] preSoftmax = outputFunction.derivative(innerPotentials);
         
         for(int i=0; i<numberOfUnits; i++) {
             double error = i == expectedOutput ? loss.derivative(output[i], 1) : loss.derivative(output[i], 0); //pro klasifikaci
             err_wrt_innerP[i] = error * preSoftmax[i];
             
-            for(int j=0; j<upperLayer.getNumberOfUnits(); j++) {
-                err_wrt_weight[i][j] = err_wrt_innerP[i] * upperLayer.getOutput()[j]; // innerPotential of neuron "i" * output of neuron "j"
+            for(int j=0; j<inputLayer.getNumberOfUnits(); j++) {
+                err_wrt_weight[i][j] = err_wrt_innerP[i] * inputLayer.getOutput()[j]; // innerPotential of neuron "i" * output of neuron "j"
             }
         }
         biasErrors.add(err_wrt_innerP); // err_wrt_innerP = err_wrt_bias
@@ -68,9 +64,9 @@ public class OutputLayerImpl implements OutputLayer {
     }
     
     @Override
-    //Inner potencial is remembered for backward pass
+    // Inner potential is remembered for backward pass.
     public void forwardPass () {
-        double[] input = upperLayer.getOutput ();
+        double[] input = inputLayer.getOutput ();
         
         for (int n = 0; n < numberOfUnits; n++) {
             innerPotentials[n] = bias[n];
@@ -79,21 +75,6 @@ public class OutputLayerImpl implements OutputLayer {
             }
         }
         this.output = outputFunction.apply (innerPotentials);
-    }
-    
-    @Override
-    public int getNumberOfUnits () {
-        return numberOfUnits;
-    }
-    
-    @Override
-    public double[] getOutput () {
-        return output;
-    }
-
-    @Override
-    public LayerWithOutput getUpperLayer () {
-        return upperLayer;
     }
     
     @Override
@@ -110,34 +91,37 @@ public class OutputLayerImpl implements OutputLayer {
     }
     
     @Override
-    public void setUpperLayer (LayerWithOutput layer) {
-        this.upperLayer = layer;
-        this.weights = new double[numberOfUnits][layer.getNumberOfUnits ()];
-    }
-
-    @Override
-    public LayerParameters getParameters() {
-        return new LayerParameters(weights, bias);
-    }
-    
-    @Override
-    public void setParameters(LayerParameters parameters) {
-        weights = parameters.getWeights();
-        bias = parameters.getBias();
-    }
-
-    @Override
-    public double[] getInnerPotentialGradient() {
-        return err_wrt_innerP;
-    }
-
-    @Override
     public List<LayerParameters> getErrors() {
         List<LayerParameters> errors = new ArrayList<>();
         for(int i=0; i<weightErrors.size(); i++) {
             errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
         }
         return errors;
+    }
+    
+    @Override
+    public double[] getInnerPotentialGradient() {
+        return err_wrt_innerP;
+    }
+
+    @Override
+    public LayerWithOutput getInputLayer () {
+        return inputLayer;
+    }
+    
+    @Override
+    public int getNumberOfUnits () {
+        return numberOfUnits;
+    }
+    
+    @Override
+    public double[] getOutput () {
+        return output;
+    }
+
+    @Override
+    public LayerParameters getParameters() {
+        return new LayerParameters(weights, bias);
     }
     
     @Override
@@ -152,7 +136,19 @@ public class OutputLayerImpl implements OutputLayer {
     }
 
     @Override
+    public void setInputLayer (LayerWithOutput layer) {
+        this.inputLayer = layer;
+        this.weights = new double[numberOfUnits][layer.getNumberOfUnits ()];
+    }
+
+    @Override
     public void setLoss(Loss loss) {
         this.loss = loss;
+    }
+    
+    @Override
+    public void setParameters(LayerParameters parameters) {
+        weights = parameters.getWeights();
+        bias = parameters.getBias();
     }
 }

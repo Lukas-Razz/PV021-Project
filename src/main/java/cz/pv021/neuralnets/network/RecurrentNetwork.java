@@ -1,7 +1,7 @@
 package cz.pv021.neuralnets.network;
 
 import cz.pv021.neuralnets.error.Cost;
-import cz.pv021.neuralnets.layers.FullyConnecedRecursiveLayer;
+import cz.pv021.neuralnets.layers.FullyConnectedRecursiveLayer;
 import cz.pv021.neuralnets.layers.FullyConnectedLayer;
 import cz.pv021.neuralnets.layers.HiddenLayer;
 import cz.pv021.neuralnets.layers.InputLayer;
@@ -65,7 +65,7 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> im
         FullyConnectedLayer zeroContextLayer = new FullyConnectedLayer (layerSize, null);
         zeroContextLayer.setOutput (zeros (layerSize));
         
-        InputMergeLayer mergedInput = new InputMergeLayer (recurrentLayer.getUpperLayer (), zeroContextLayer);
+        InputMergeLayer mergedInput = new InputMergeLayer (recurrentLayer.getInputLayer (), zeroContextLayer);
         hiddenLayers.add (i, mergedInput);
         for (int t = 0; t < k; t++) {
             HiddenLayer unfoldedLayer = recurrentLayer.feedForwardCopy ();
@@ -85,7 +85,7 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> im
         
         HiddenLayer firstUnfolded = unfolded.get (0);
         int layerSize = firstUnfolded.getNumberOfUnits ();
-        FullyConnecedRecursiveLayer folded = new FullyConnecedRecursiveLayer (
+        FullyConnectedRecursiveLayer folded = new FullyConnectedRecursiveLayer (
             layerSize,
             firstUnfolded.getActivationFunction ()
         );
@@ -109,8 +109,6 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> im
         hiddenLayers.add (folded);
         hiddenLayers.addAll (afterUnfolded);
         
-        // Layers.connect (unfolded.get(0).getUpperLayer(), unfolded.get(0));
-        // Layers.connect (unfolded.get(k-1), unfolded.get(k-1).getLowerLayer());
         this.connectLayers ();
     }
     

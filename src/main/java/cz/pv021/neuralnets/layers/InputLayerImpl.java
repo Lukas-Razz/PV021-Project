@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class InputLayerImpl implements InputLayer {
     final Logger logger = LoggerFactory.getLogger (InputLayerImpl.class);
-    private LayerWithInput lowerLayer; // Vystupni
+    private LayerWithInput outputLayer;
     private final int numberOfUnits;
     private double[] output;
     
@@ -22,8 +22,8 @@ public class InputLayerImpl implements InputLayer {
     }
 
     @Override
-    public LayerWithInput getLowerLayer () {
-        return lowerLayer;
+    public LayerWithInput getOutputLayer () {
+        return outputLayer;
     }
     
     @Override
@@ -42,7 +42,7 @@ public class InputLayerImpl implements InputLayer {
     }
 
     @Override
-    public void setLowerLayer (LayerWithInput layer) {
-        this.lowerLayer = layer;
+    public void setOutputLayer (LayerWithInput layer) {
+        this.outputLayer = layer;
     }
 }

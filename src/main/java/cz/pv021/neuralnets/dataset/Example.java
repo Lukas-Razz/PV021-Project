@@ -1,16 +1,12 @@
 package cz.pv021.neuralnets.dataset;
 
-import cz.pv021.neuralnets.dataset.iris.IrisClass;
-
 /**
- * @author  Lukáš Daubner
+ * @author  Lukáš Daubner, Josef Plch
  * @since   2016-12-10
- * @version 2016-12-10
+ * @version 2016-12-13
  */
 public interface Example {
+    double[] getAttributes ();
 
-    double[] getAttributes();
-
-    IrisClass getIrisClass(); //TODO: Odstranit závyslost na Iris
-    
+    DataClass getExampleClass ();
 }

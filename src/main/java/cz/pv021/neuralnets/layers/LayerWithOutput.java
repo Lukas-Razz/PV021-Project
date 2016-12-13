@@ -5,20 +5,20 @@ package cz.pv021.neuralnets.layers;
  * 
  * @author  Josef Plch
  * @since   2016-11-08
- * @version 2016-12-11
+ * @version 2016-12-13
  */
 public interface LayerWithOutput extends Layer {
     /**
-     * Get the next (output) layer.
+     * Get the output (i.e. next) layer.
      * 
      * @return Output layer.
      */
-    public LayerWithInput getLowerLayer ();
+    public LayerWithInput getOutputLayer ();
     
     /**
-     * Set the next (output) layer.
+     * Set the output (i.e. next) layer.
      * 
-     * @param nextLayer Output layer.
+     * @param outputLayer Output layer.
      */
-    public void setLowerLayer (LayerWithInput nextLayer);
+    public void setOutputLayer (LayerWithInput outputLayer);
 }

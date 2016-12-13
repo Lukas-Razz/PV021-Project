@@ -27,7 +27,7 @@ public interface LayerWithInput extends Layer {
     
     public LayerParameters getParameters ();
     
-    public LayerWithOutput getUpperLayer ();
+    public LayerWithOutput getInputLayer ();
     
     public void initializeWeights (long seed);
     
@@ -40,5 +40,5 @@ public interface LayerWithInput extends Layer {
      * 
      * @param layer 
      */
-    public void setUpperLayer (LayerWithOutput layer);
+    public void setInputLayer (LayerWithOutput layer);
 }

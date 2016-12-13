@@ -1,10 +1,8 @@
 package cz.pv021.neuralnets.layers;
 
-import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.ActivationFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -19,15 +17,15 @@ public class FullyConnectedLayer implements HiddenLayer {
     private final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
     
     private final ActivationFunction activationFunction;
-    private LayerWithInput lowerLayer; // Vystupni
-    private LayerWithOutput upperLayer; // Vstupni
+    private LayerWithInput outputLayer;
+    private LayerWithOutput inputLayer;
     private final int numberOfUnits;
     private double[] output;
     private double[][] weights;
     private double[] bias;
     
-    private double[] innerPotencials;
-    private double[] err_wrt_innerP;
+    private double[] innerPotentials;
+    private double[] err_wrt_innerP; // Error with respect to inner potential.
     
     private List<double[][]> weightErrors;
     private List<double[]> biasErrors;
@@ -38,7 +36,7 @@ public class FullyConnectedLayer implements HiddenLayer {
         this.bias = new double[numberOfUnits];
         this.activationFunction = activationFunction;
         
-        this.innerPotencials = new double[numberOfUnits];
+        this.innerPotentials = new double[numberOfUnits];
         this.err_wrt_innerP = new double[numberOfUnits];
         
         weightErrors = new ArrayList<>();
@@ -47,17 +45,19 @@ public class FullyConnectedLayer implements HiddenLayer {
 
     @Override
     public void backwardPass () {
-        double[][] e_wrt_weight = new double[numberOfUnits][upperLayer.getNumberOfUnits()];
+        // Error with respect to weight.
+        double[][] e_wrt_weight = new double[numberOfUnits][inputLayer.getNumberOfUnits()];
         
-        for(int i=0; i<numberOfUnits; i++) {
+        for (int i=0; i<numberOfUnits; i++) {
             err_wrt_innerP[i] = 0;
-            for (int k=0; k<lowerLayer.getNumberOfUnits(); k++) {
-                 err_wrt_innerP[i] += lowerLayer.getInnerPotentialGradient()[k] * lowerLayer.getParameters().getWeights()[k][i];
+            for (int k=0; k<outputLayer.getNumberOfUnits(); k++) {
+                 err_wrt_innerP[i] += outputLayer.getInnerPotentialGradient()[k] * outputLayer.getParameters().getWeights()[k][i];
             }
-            err_wrt_innerP[i] = err_wrt_innerP[i] * activationFunction.derivative(innerPotencials[i]);
+            err_wrt_innerP[i] = err_wrt_innerP[i] * activationFunction.derivative(innerPotentials[i]);
             
-            for(int j=0; j<upperLayer.getNumberOfUnits(); j++) {
-                e_wrt_weight[i][j] = err_wrt_innerP[i] * upperLayer.getOutput()[j]; // innerPotential of neuron "i" * output of neuron "j"
+            for (int j=0; j<inputLayer.getNumberOfUnits(); j++) {
+                // innerPotential of neuron "i" * output of neuron "j"
+                e_wrt_weight[i][j] = err_wrt_innerP[i] * inputLayer.getOutput()[j];
             }
         }
         biasErrors.add(err_wrt_innerP); // e_wrt_innerP = e_wrt_bias
@@ -66,19 +66,19 @@ public class FullyConnectedLayer implements HiddenLayer {
 
     @Override
     public void forwardPass () {
-        double[] input = upperLayer.getOutput ();
+        double[] input = inputLayer.getOutput ();
         for (int n = 0; n < numberOfUnits; n++) {
-            innerPotencials[n] = bias[n];
+            innerPotentials[n] = bias[n];
             for (int i = 0; i < weights[n].length; i++) {
-                innerPotencials[n] += input[i] * weights[n][i];
+                innerPotentials[n] += input[i] * weights[n][i];
             }
-            output[n] = activationFunction.apply (innerPotencials[n]);
+            output[n] = activationFunction.apply (innerPotentials[n]);
         }
     }
     
     @Override
-    public LayerWithInput getLowerLayer () {
-        return lowerLayer;
+    public LayerWithInput getOutputLayer () {
+        return outputLayer;
     }
     
     @Override
@@ -92,8 +92,8 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     @Override
-    public LayerWithOutput getUpperLayer () {
-        return upperLayer;
+    public LayerWithOutput getInputLayer () {
+        return inputLayer;
     }
     
     @Override
@@ -110,14 +110,14 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     @Override
-    public void setLowerLayer (LayerWithInput nextLayer) {
-        this.lowerLayer = nextLayer;
+    public void setOutputLayer (LayerWithInput outputLayer) {
+        this.outputLayer = outputLayer;
     }
     
     @Override
-    public void setUpperLayer (LayerWithOutput previousLayer) {
-        this.upperLayer = previousLayer;
-        weights = new double[numberOfUnits][previousLayer.getNumberOfUnits ()];
+    public void setInputLayer (LayerWithOutput inputLayer) {
+        this.inputLayer = inputLayer;
+        weights = new double[numberOfUnits][inputLayer.getNumberOfUnits ()];
     }
 
     @Override
@@ -169,7 +169,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     public double[] getInnerPotentials () {
-        return innerPotencials;
+        return innerPotentials;
     }
     
     public List <double[][]> getWeightErrors () {
@@ -193,7 +193,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     public void setInnerPotentials (double[] innerPotentials) {
-        this.innerPotencials = innerPotentials;
+        this.innerPotentials = innerPotentials;
     }
     
     public void setOutput (double[] output) {

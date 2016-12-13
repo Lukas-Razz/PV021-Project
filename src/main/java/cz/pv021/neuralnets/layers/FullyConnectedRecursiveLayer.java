@@ -9,18 +9,16 @@ import org.slf4j.LoggerFactory;
 /**
  * A recursive layer, i.e. layer with self-loops.
  * 
- * TODO: Rename (there is a missing T in the class name).
- * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-10-30
  * @version 2016-12-12
  */
-public class FullyConnecedRecursiveLayer extends FullyConnectedLayer implements RecursiveHiddenLayer {
-    private final Logger logger = LoggerFactory.getLogger (FullyConnecedRecursiveLayer.class);
+public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements RecursiveHiddenLayer {
+    private final Logger logger = LoggerFactory.getLogger (FullyConnectedRecursiveLayer.class);
     private double[][] loopWeights;
     private final int layerSize;
 
-    public FullyConnecedRecursiveLayer (int numberOfUnits, ActivationFunction activationFunction) {
+    public FullyConnectedRecursiveLayer (int numberOfUnits, ActivationFunction activationFunction) {
         super (numberOfUnits, activationFunction);
         this.loopWeights = new double[numberOfUnits][numberOfUnits];
         this.layerSize = numberOfUnits;
@@ -48,13 +46,13 @@ public class FullyConnecedRecursiveLayer extends FullyConnectedLayer implements 
         FullyConnectedLayer zeroContextLayer = new FullyConnectedLayer (layerSize, null);
         zeroContextLayer.setOutput (zeros (layerSize));
         
-        InputMergeLayer inputLayer = new InputMergeLayer (this.getUpperLayer (), zeroContextLayer);
+        InputMergeLayer inputLayer = new InputMergeLayer (this.getInputLayer (), zeroContextLayer);
         for (int i = 0; i < k; i++) {
             FullyConnectedLayer ffCopy = this.feedForwardCopy ();
             Layers.connect (inputLayer, ffCopy);
             inputLayer = new InputMergeLayer (ffCopy, inputLayer);
         }
-        Layers.connect (inputLayer, this.getLowerLayer ());
+        Layers.connect (inputLayer, this.getOutputLayer ());
     }
 
     
@@ -71,7 +69,7 @@ public class FullyConnecedRecursiveLayer extends FullyConnectedLayer implements 
     
     @Override
     public void forwardPass () {
-        double[] input = this.getUpperLayer().getOutput ();
+        double[] input = this.getInputLayer().getOutput ();
         
         ActivationFunction activationFunction = this.getActivationFunction ();
         double[] bias = this.getBias ();
