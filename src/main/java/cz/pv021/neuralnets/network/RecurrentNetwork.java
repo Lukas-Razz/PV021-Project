@@ -65,13 +65,13 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> im
         FullyConnectedLayer zeroContextLayer = new FullyConnectedLayer (layerSize, null);
         zeroContextLayer.setOutput (zeros (layerSize));
         
-        InputMergeLayer unfoldedLayer = new InputMergeLayer (recurrentLayer.getUpperLayer (), zeroContextLayer);
-        hiddenLayers.add (i, unfoldedLayer);
+        InputMergeLayer mergedInput = new InputMergeLayer (recurrentLayer.getUpperLayer (), zeroContextLayer);
+        hiddenLayers.add (i, mergedInput);
         for (int t = 0; t < k; t++) {
-            HiddenLayer ffCopy = recurrentLayer.feedForwardCopy ();
-            // Layers.connect (unfoldedLayer, ffCopy);
-            unfoldedLayer = new InputMergeLayer (unfoldedLayer, ffCopy);
-            hiddenLayers.add (i + t, unfoldedLayer);
+            HiddenLayer unfoldedLayer = recurrentLayer.feedForwardCopy ();
+            Layers.connect (mergedInput, unfoldedLayer);
+            mergedInput = new InputMergeLayer (mergedInput, unfoldedLayer);
+            hiddenLayers.add (i + t, mergedInput);
         }
         
         this.connectLayers ();

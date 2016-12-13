@@ -19,10 +19,12 @@ public class InputMergeLayer extends FullyConnectedLayer {
     private final int sizeB;
     
     // TODO: Activation function.
+    // The function should not be used at all... Layer A & B functions should
+    // be used instead.
     public InputMergeLayer (LayerWithOutput layerA, LayerWithOutput layerB) {
         super (
             layerA.getNumberOfUnits () + layerB.getNumberOfUnits (),
-            new HyperbolicTangent ()
+            null // new HyperbolicTangent ()
         );
         this.inputLayerA = layerA;
         this.inputLayerB = layerB;

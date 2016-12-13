@@ -265,12 +265,12 @@ public class MLP {
         Cost cost = new Cost (new SquaredError(), l1, l2);
         Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
         
-        ByteInputLayer layer0  = new ByteInputLayer ();
-        HiddenLayer    layer1a = new FullyConnecedRecursiveLayer (10, new HyperbolicTangent());
-        HiddenLayer    layer1b = new FullyConnectedLayer (10, new HyperbolicTangent());
-        OutputLayer    layer2  = new OutputLayerImpl (3, new Softmax ());
+        InputLayer  layer0  = new InputLayerImpl (256);
+        HiddenLayer layer1a = new FullyConnecedRecursiveLayer (1, new HyperbolicTangent());
+        // HiddenLayer layer1b = new FullyConnectedLayer (10, new HyperbolicTangent());
+        OutputLayer layer2  = new OutputLayerImpl (10, new Softmax ());
         
-        RecurrentNetwork <ByteInputLayer, OutputLayer> irisPerceptron = new RecurrentNetwork <> (
+        RecurrentNetwork <InputLayer, OutputLayer> irisPerceptron = new RecurrentNetwork <> (
             layer0,
             Arrays.asList (layer1a),
             layer2,
