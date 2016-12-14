@@ -17,18 +17,16 @@ public class FullyConnectedLayer implements HiddenLayer {
     private final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
     
     private final ActivationFunction activationFunction;
+    private InputMerger inputMerger;
     private LayerWithInput outputLayer;
-    private LayerWithOutput inputLayer;
+    private double[] bias;
+    private List<double[]> biasErrors;
+    private double[] err_wrt_innerP; // Error with respect to inner potential.
+    private double[] innerPotentials;
     private final int numberOfUnits;
     private double[] output;
-    private double[][] weights;
-    private double[] bias;
-    
-    private double[] innerPotentials;
-    private double[] err_wrt_innerP; // Error with respect to inner potential.
-    
     private List<double[][]> weightErrors;
-    private List<double[]> biasErrors;
+    private double[][] weights;
 
     public FullyConnectedLayer (int numberOfUnits, ActivationFunction activationFunction) {
         this.numberOfUnits = numberOfUnits;
@@ -46,7 +44,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     @Override
     public void backwardPass () {
         // Error with respect to weight.
-        double[][] e_wrt_weight = new double[numberOfUnits][inputLayer.getNumberOfUnits()];
+        double[][] e_wrt_weight = new double[numberOfUnits][inputMerger.getNumberOfUnits()];
         
         for (int i=0; i<numberOfUnits; i++) {
             err_wrt_innerP[i] = 0;
@@ -55,9 +53,9 @@ public class FullyConnectedLayer implements HiddenLayer {
             }
             err_wrt_innerP[i] = err_wrt_innerP[i] * activationFunction.derivative(innerPotentials[i]);
             
-            for (int j=0; j<inputLayer.getNumberOfUnits(); j++) {
+            for (int j=0; j<inputMerger.getNumberOfUnits(); j++) {
                 // innerPotential of neuron "i" * output of neuron "j"
-                e_wrt_weight[i][j] = err_wrt_innerP[i] * inputLayer.getOutput()[j];
+                e_wrt_weight[i][j] = err_wrt_innerP[i] * inputMerger.getOutput()[j];
             }
         }
         biasErrors.add(err_wrt_innerP); // e_wrt_innerP = e_wrt_bias
@@ -66,7 +64,7 @@ public class FullyConnectedLayer implements HiddenLayer {
 
     @Override
     public void forwardPass () {
-        double[] input = inputLayer.getOutput ();
+        double[] input = inputMerger.getOutput ();
         for (int n = 0; n < numberOfUnits; n++) {
             innerPotentials[n] = bias[n];
             for (int i = 0; i < weights[n].length; i++) {
@@ -74,81 +72,6 @@ public class FullyConnectedLayer implements HiddenLayer {
             }
             output[n] = activationFunction.apply (innerPotentials[n]);
         }
-    }
-    
-    @Override
-    public LayerWithInput getOutputLayer () {
-        return outputLayer;
-    }
-    
-    @Override
-    public int getNumberOfUnits () {
-        return numberOfUnits;
-    }
-
-    @Override
-    public double[] getOutput () {
-        return output;
-    }
-    
-    @Override
-    public LayerWithOutput getInputLayer () {
-        return inputLayer;
-    }
-    
-    @Override
-    public void initializeWeights (long seed) {
-        Random r = new Random (seed);
-        for (int i = 0; i < weights.length; i++) {
-            for (int j = 0; j < weights[i].length; j++) {
-                weights[i][j] = r.nextGaussian ();
-            }
-        }
-        for (int i = 0; i < bias.length; i++) {
-            bias[i] = 0;
-        }
-    }
-    
-    @Override
-    public void setOutputLayer (LayerWithInput outputLayer) {
-        this.outputLayer = outputLayer;
-    }
-    
-    @Override
-    public void setInputLayer (LayerWithOutput inputLayer) {
-        this.inputLayer = inputLayer;
-        weights = new double[numberOfUnits][inputLayer.getNumberOfUnits ()];
-    }
-
-    @Override
-    public LayerParameters getParameters() {
-        return new LayerParameters(weights, bias);
-    }
-    
-    @Override
-    public void setParameters(LayerParameters parameters) {
-        weights = parameters.getWeights();
-        bias = parameters.getBias();
-    }
-
-    @Override
-    public double[] getInnerPotentialGradient() {
-        return err_wrt_innerP;
-    }
-
-    @Override
-    public List<LayerParameters> getErrors() {
-        List<LayerParameters> errors = new ArrayList<>();
-        for(int i=0; i<weightErrors.size(); i++) {
-            errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
-        }
-        return errors;
-    }
-
-    @Override
-    public void resetGradients() {
-        biasErrors.clear();
-        weightErrors.clear();
     }
     
     @Override
@@ -172,12 +95,91 @@ public class FullyConnectedLayer implements HiddenLayer {
         return innerPotentials;
     }
     
+    @Override
+    public List <LayerWithOutput> getInputLayers () {
+        return inputMerger.getLayers ();
+    }
+    
+    public InputMerger getInputMerger () {
+        return inputMerger;
+    }
+    
+    @Override
+    public int getNumberOfUnits () {
+        return numberOfUnits;
+    }
+
+    @Override
+    public double[] getOutput () {
+        return output;
+    }
+    
+    @Override
+    public LayerWithInput getOutputLayer () {
+        return outputLayer;
+    }
+    
+    @Override
+    public LayerParameters getParameters () {
+        return new LayerParameters(weights, bias);
+    }
+    
     public List <double[][]> getWeightErrors () {
         return weightErrors;
     }
     
     public double[][] getWeights () {
         return weights;
+    }
+    
+    @Override
+    public void initializeWeights (long seed) {
+        Random r = new Random (seed);
+        for (int i = 0; i < weights.length; i++) {
+            for (int j = 0; j < weights[i].length; j++) {
+                weights[i][j] = r.nextGaussian ();
+            }
+        }
+        for (int i = 0; i < bias.length; i++) {
+            bias[i] = 0;
+        }
+    }
+    
+    @Override
+    public void setOutputLayer (LayerWithInput outputLayer) {
+        this.outputLayer = outputLayer;
+    }
+    
+    @Override
+    public void setInputLayers (List <LayerWithOutput> layers) {
+        this.inputMerger = new InputMerger (layers);
+        this.weights = new double[numberOfUnits][inputMerger.getNumberOfUnits ()];
+    }
+
+    @Override
+    public void setParameters (LayerParameters parameters) {
+        weights = parameters.getWeights();
+        bias = parameters.getBias();
+    }
+
+    @Override
+    public double[] getInnerPotentialGradient () {
+        return err_wrt_innerP;
+    }
+
+    @Override
+    public List<LayerParameters> getErrors () {
+        List<LayerParameters> errors = new ArrayList<>();
+        for(int i=0; i<weightErrors.size(); i++) {
+            errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
+        }
+        return errors;
+    }
+
+    @Override
+    public void resetGradients() {
+        biasErrors.clear();
+        weightErrors.clear();
     }
     
     public void setBias (double[] bias) {

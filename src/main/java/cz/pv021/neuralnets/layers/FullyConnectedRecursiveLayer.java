@@ -24,41 +24,17 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
         this.layerSize = numberOfUnits;
     }
     
-    /**
-     * Unfolding schema:
-     * 
-     *    y                        y_t-1     y_t       y_t+1
-     *    O                        O         O         O
-     *    ↑                        ↑         ↑         ↑
-     *  V | ___                  V |       V |       V |
-     *    |/   \     unfold        | s_t-1   | s_t     | s_t+1
-     *  s O     | W  =====> ------>O-------->O-------->O-------->
-     *    ↑\___/              W    ↑    W    ↑    W    ↑    W
-     *  U |                      U |       U |       U |
-     *    |                        |         |         |
-     *    O                        O         O         O
-     *    x                        x_t-1     x_t       x_t+1
-     * 
-     * @param k Number of layers to unfold to.
-     */
-    @Override
-    public void unfold (int k) {
-        FullyConnectedLayer zeroContextLayer = new FullyConnectedLayer (layerSize, null);
-        zeroContextLayer.setOutput (zeros (layerSize));
-        
-        InputMergeLayer inputLayer = new InputMergeLayer (this.getInputLayer (), zeroContextLayer);
-        for (int i = 0; i < k; i++) {
-            FullyConnectedLayer ffCopy = this.feedForwardCopy ();
-            Layers.connect (inputLayer, ffCopy);
-            inputLayer = new InputMergeLayer (ffCopy, inputLayer);
-        }
-        Layers.connect (inputLayer, this.getOutputLayer ());
-    }
-
-    
+    // TODO
     @Override
     public FullyConnectedLayer feedForwardCopy () {
         FullyConnectedLayer clone = new FullyConnectedLayer (this.getNumberOfUnits (), this.getActivationFunction ());
+        clone.setBias            (this.getBias ());
+        clone.setBiasErrors      (this.getBiasErrors ());
+        clone.setErrWrtInnerP    (this.getErrWrtInnerP ());
+        clone.setInnerPotentials (this.getInnerPotentials ());
+        clone.setOutput          (this.getOutput ());
+        clone.setWeightErrors    (this.getWeightErrors ());
+        clone.setWeights         (this.getWeights ());
         return clone;
     }
     
@@ -69,19 +45,19 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
     
     @Override
     public void forwardPass () {
-        double[] input = this.getInputLayer().getOutput ();
+        double[] input = this.getInputMerger().getOutput();
         
         ActivationFunction activationFunction = this.getActivationFunction ();
         double[] bias = this.getBias ();
-        double[][] ffWeights = this.getWeights ();
+        double[][] forwardWeights = this.getWeights ();
         double[] innerPotentials = this.getInnerPotentials ();
         double[] output = new double [layerSize];
         
         for (int n = 0; n < layerSize; n++) {
             double previousPotential = innerPotentials[n];
             innerPotentials[n] = bias[n];
-            for (int i = 0; i < ffWeights[n].length; i++) {
-                innerPotentials[n] += input[i] * ffWeights[n][i];
+            for (int i = 0; i < forwardWeights[n].length; i++) {
+                innerPotentials[n] += input[i] * forwardWeights[n][i];
             }
             for (int i = 0; i < layerSize; i++) {
                 innerPotentials[n] += previousPotential * loopWeights[n][i];
@@ -106,14 +82,9 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
         }
     }
     
-    private double uniformRandom (Random random, double from, double to) {
+    private static double uniformRandom (Random random, double from, double to) {
+        // Random double is in range <0, 1>.
         double randomValue = random.nextDouble ();
         return randomValue * (to - from) - from;
-    }
-    
-    private double[] zeros (int n) {
-        double[] result = new double[n];
-        Arrays.fill (result, 0);
-        return result;
     }
 }

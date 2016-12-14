@@ -43,19 +43,18 @@ public class RnnDemo {
         Cost cost = new Cost (new SquaredError(), l1, l2);
         Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
         
-        InputLayer  layer0  = new InputLayerImpl (256);
-        HiddenLayer layer1a = new FullyConnectedRecursiveLayer (1, new HyperbolicTangent());
-        // HiddenLayer layer1b = new FullyConnectedLayer (10, new HyperbolicTangent());
-        OutputLayer layer2  = new OutputLayerImpl (10, new Softmax ());
+        ByteInputLayer layer0 = new ByteInputLayer ();
+        HiddenLayer    layer1 = new FullyConnectedRecursiveLayer (5, new HyperbolicTangent());
+        OutputLayer    layer2 = new OutputLayerImpl (4, new Softmax ());
         
-        RecurrentNetwork <InputLayer, OutputLayer> irisPerceptron = new RecurrentNetwork <> (
+        RecurrentNetwork <Byte, OutputLayer> network = new RecurrentNetwork <> (
             layer0,
-            Arrays.asList (layer1a),
+            Arrays.asList (layer1),
             layer2,
             cost,
             optimizer
         );
-        irisPerceptron.initializeWeights (123456789);
+        network.initializeWeights (100);
         
         String csDataPath = "./data/language_identification/cs_sentences.txt";
         Path csDataFilePath = FileSystems.getDefault().getPath (csDataPath);
@@ -70,25 +69,31 @@ public class RnnDemo {
                 confusionMatrix[row][col] = 0;
             }
         }
-         
-        for (String csSentence : csSentences) {
+        
+        int i = 1;
+        for (String csSentence : csSentences.subList (0, 10)) {
             byte[] bytes = csSentence.getBytes (StandardCharsets.UTF_8);
             List <double[]> attributeSequence = new LinkedList <> ();
             for (byte byte8 : bytes) {
                 attributeSequence.add (ByteUtils.byteToOneHotVector (byte8));
             }
-            int csClassNumber = 0;
             
-            irisPerceptron.backpropagationThroughTime (attributeSequence, csClassNumber);
-            int predictedClassNumber = irisPerceptron.getOutputClassIndex ();
-            confusionMatrix[csClassNumber][predictedClassNumber]++;
-
+            int classNumber = 0;
+            network.backpropagationThroughTime (attributeSequence, classNumber);
+            int predictedClassNumber = network.getOutputClassIndex ();
+            confusionMatrix[classNumber][predictedClassNumber]++;
+            
+            System.out.println ();
+            System.out.println ("=== Example #" + i + " ===");
+            List <HiddenLayer> hiddenLayers = network.getHiddenLayers ();
+            System.out.println ("innerPotentials = " + Arrays.toString (hiddenLayers.get(0).getInnerPotentials()));
             System.out.println (
-                "Output in epoch #" + "?" + ":"
-                + " classWeights = " + Arrays.toString (irisPerceptron.getOutput ())
-                + ", outputClass = " + predictedClassNumber
-                + ", expectedClass = " + csClassNumber
+                "output = " + Arrays.toString (network.getOutput ())
+                // + ", predictedClass = " + predictedClassNumber
+                // + ", expectedClass = " + classNumber
             );
+            
+            i++;
         }
     }
 }

@@ -5,113 +5,46 @@ import cz.pv021.neuralnets.layers.FullyConnectedRecursiveLayer;
 import cz.pv021.neuralnets.layers.FullyConnectedLayer;
 import cz.pv021.neuralnets.layers.HiddenLayer;
 import cz.pv021.neuralnets.layers.InputLayer;
-import cz.pv021.neuralnets.layers.InputMergeLayer;
-import cz.pv021.neuralnets.layers.Layer;
-import cz.pv021.neuralnets.layers.LayerWithInput;
 import cz.pv021.neuralnets.layers.LayerWithOutput;
 import cz.pv021.neuralnets.layers.Layers;
 import cz.pv021.neuralnets.layers.OutputLayer;
 import cz.pv021.neuralnets.layers.RecursiveHiddenLayer;
-import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.List;
 import cz.pv021.neuralnets.optimizers.Optimizer;
-import cz.pv021.neuralnets.utils.OutputExample;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 
 /**
- * @param <IL> Type of the input layer.
+ * Schema of unfolding:
+ * 
+ *    y                        y_t-1     y_t       y_t+1
+ *    O                        O         O         O
+ *    ↑                        ↑         ↑         ↑
+ *  V | ___                  V |       V |       V |
+ *    |/   \     unfold        | s_t-1   | s_t     | s_t+1
+ *  s O     | W  =====> ------>O-------->O-------->O-------->
+ *    ↑\___/              W    ↑    W    ↑    W    ↑    W
+ *  U |                      U |       U |       U |
+ *    |                        |         |         |
+ *    O                        O         O         O
+ *    x                        x_t-1     x_t       x_t+1
+ * 
+ * 
+ * @param <I>  Type of input objects.
  * @param <OL> Type of the output layer.
  * 
  * @author  Josef Plch
  * @since   2016-12-11
- * @version 2016-12-12
+ * @version 2016-12-14
  */
-public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> implements Network {
-    private final IL inputLayer;
-    private final LinkedList <HiddenLayer> hiddenLayers = new LinkedList <> ();
-    private final OL outputLayer;
-    private final Cost cost;
-    private final Optimizer optimizer;
-    
-    public RecurrentNetwork (IL inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
-        this.inputLayer = inputLayer;
-        this.hiddenLayers.addAll (hiddenLayers);
-        this.outputLayer = outputLayer;
-        this.cost = cost;
-        this.optimizer = optimizer;
-        this.outputLayer.setLoss (cost.getLoss ());
-        connectLayers ();
+public class RecurrentNetwork <I, OL extends OutputLayer> extends MultilayerPerceptron {
+    public RecurrentNetwork (InputLayer <I> inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
+        super (inputLayer, hiddenLayers, outputLayer, cost, optimizer);
     }
     
-    private double[] zeros (int n) {
-        double[] result = new double[n];
-        Arrays.fill (result, 0);
-        return result;
-    }
-    
-    private void unfold (int i, int k) {
-        // this.hiddenLayers.get(i).unfold(k);
-        
-        HiddenLayer layer = hiddenLayers.get (i);
-        if (! (layer instanceof RecursiveHiddenLayer)) {
-            throw new IllegalArgumentException ("Trying to unfold non-recurrent layer.");
-        }
-        
-        hiddenLayers.remove (i);
-        RecursiveHiddenLayer recurrentLayer = (RecursiveHiddenLayer) layer;
-        int layerSize = recurrentLayer.getNumberOfUnits ();
-        FullyConnectedLayer zeroContextLayer = new FullyConnectedLayer (layerSize, null);
-        zeroContextLayer.setOutput (zeros (layerSize));
-        
-        InputMergeLayer mergedInput = new InputMergeLayer (recurrentLayer.getInputLayer (), zeroContextLayer);
-        hiddenLayers.add (i, mergedInput);
-        for (int t = 0; t < k; t++) {
-            HiddenLayer unfoldedLayer = recurrentLayer.feedForwardCopy ();
-            Layers.connect (mergedInput, unfoldedLayer);
-            mergedInput = new InputMergeLayer (mergedInput, unfoldedLayer);
-            hiddenLayers.add (i + t, mergedInput);
-        }
-        
-        this.connectLayers ();
-    }
-    
-    // Let k layers collapse into a single recurent one.
-    private void fold (int i, int k) {
-        List <HiddenLayer> beforeUnfolded = hiddenLayers.subList (0, i);
-        List <HiddenLayer> unfolded       = hiddenLayers.subList (i, i + k);
-        List <HiddenLayer> afterUnfolded  = hiddenLayers.subList (i + k, hiddenLayers.size ());
-        
-        HiddenLayer firstUnfolded = unfolded.get (0);
-        int layerSize = firstUnfolded.getNumberOfUnits ();
-        FullyConnectedRecursiveLayer folded = new FullyConnectedRecursiveLayer (
-            layerSize,
-            firstUnfolded.getActivationFunction ()
-        );
-        
-        // TODO: Update the other attributes.
-        double[] innerPotentialSums = new double[layerSize];
-        for (HiddenLayer layer : unfolded) {
-            InputMergeLayer unf = (InputMergeLayer) layer;
-            LayerWithOutput layerA = unf.getLayerA ();
-            double[] innerPotentials = unf.getInnerPotentials ();
-            for (int i2 = 0; i2 < layerSize; i2++) {
-                innerPotentialSums[i2] += innerPotentials[i2];
-            }
-        }
-        for (int i2 = 0; i2 < layerSize; i2++) {
-            innerPotentialSums[i2] /= k;
-        }
-        
-        hiddenLayers.clear ();
-        hiddenLayers.addAll (beforeUnfolded);
-        hiddenLayers.add (folded);
-        hiddenLayers.addAll (afterUnfolded);
-        
-        this.connectLayers ();
-    }
-    
+    // TODO: Folding and unfolding is completely wrong.
+    // (Má se rozkládat do šířky, ne do hloubky.)
+    //
     // a[t] is the input at time t.
     // y[t] is the output
     public void backpropagationThroughTime (List <double[]> a, double y) {   
@@ -132,10 +65,10 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> im
         // n = the length of the training sequence
         for (int t = 0; t < n - k; t++) {
             // Set the network inputs to x, a[t], a[t+1], ..., a[t+k-1]
-            this.inputLayer.setInput (x);
+            this.getInputLayer().setInput (x);
             this.forwardPass ();
             for (int i = t; i < t+k-1; i++) {
-                this.inputLayer.setInput (a.get (i));
+                this.getInputLayer().setInput (a.get (i));
                 this.forwardPass ();
             }
             
@@ -148,7 +81,7 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> im
             // Sum the weight changes in the k instances of f together.
             // Update all the weights in f and g.
             this.backwardPass ();
-
+            
             // Compute the context for the next time-step.
             // x = f (x, a[t]);
         }
@@ -156,96 +89,77 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> im
         this.fold (hiddenIndex, k);
     }
     
-    private void adaptLayerWeights (LayerWithInput layer) {
-        LayerParameters parameters = layer.getParameters ();
-        List<LayerParameters> gradients = layer.getErrors();
-        layer.setParameters (optimizer.changeParameters (parameters, gradients));
-        layer.resetGradients();
-    }
-    
-    public void adaptWeights () {
-        hiddenLayers.forEach (hiddenLayer -> {
-            adaptLayerWeights (hiddenLayer);
-        });
-        adaptLayerWeights (outputLayer);
-    }
-    
-    public void backwardPass () {
-        // The layers must be processed in reverse order.
-        outputLayer.backwardPass ();
-        for (int i = hiddenLayers.size () - 1; i >= 0; i--) {
-            hiddenLayers.get(i).backwardPass ();
-        }
-    }
-    
-    private void connectLayers () {
-        if (hiddenLayers.isEmpty ()) {
-            Layers.connect (inputLayer, outputLayer);
-        }
-        else {
-            Layers.connect (inputLayer, hiddenLayers.get (0));
-            
-            int numberOfHiddenLayers = hiddenLayers.size ();
-            for (int i = 0; i < numberOfHiddenLayers - 1; i++) {
-                Layers.connect (hiddenLayers.get (i), hiddenLayers.get (i + 1));
+    // Let k layers collapse into a single recurent one.
+    private void fold (int i, int k) {
+        List <HiddenLayer> hiddenLayers = this.getHiddenLayers ();
+        
+        // Simple sublist is just a view of the original list!
+        List <HiddenLayer> beforeUnfolded = new ArrayList (hiddenLayers.subList (0, i));
+        List <HiddenLayer> unfoldedLayers = new ArrayList (hiddenLayers.subList (i, i + k));
+        List <HiddenLayer> afterUnfolded  = new ArrayList (hiddenLayers.subList (i + k, hiddenLayers.size ()));
+        
+        HiddenLayer firstUnfolded = unfoldedLayers.get (0);
+        int layerSize = firstUnfolded.getNumberOfUnits ();
+        FullyConnectedRecursiveLayer folded = new FullyConnectedRecursiveLayer (
+            layerSize,
+            firstUnfolded.getActivationFunction ()
+        );
+        
+        // TODO: Update the other attributes.
+        double[] innerPotentialSums = new double[layerSize];
+        for (HiddenLayer unfoldedLayer : unfoldedLayers) {
+            double[] innerPotentials = unfoldedLayer.getInnerPotentials ();
+            for (int i2 = 0; i2 < layerSize; i2++) {
+                innerPotentialSums[i2] += innerPotentials[i2];
             }
+        }
+        for (int i2 = 0; i2 < layerSize; i2++) {
+            innerPotentialSums[i2] /= k;
+        }
+        folded.setInnerPotentials (innerPotentialSums);
+        
+        hiddenLayers.clear ();
+        hiddenLayers.addAll (beforeUnfolded);
+        hiddenLayers.add (folded);
+        hiddenLayers.addAll (afterUnfolded);
+        
+        this.connectLayers ();
+    }
+    
+    private void unfold (int i, int k) {
+        List <HiddenLayer> hiddenLayers = this.getHiddenLayers ();
+        HiddenLayer layer = hiddenLayers.get (i);
+        if (! (layer instanceof RecursiveHiddenLayer)) {
+            throw new IllegalArgumentException ("Trying to unfold non-recurrent layer.");
+        }
+        
+        hiddenLayers.remove (i);
+        RecursiveHiddenLayer recurrentLayer = (RecursiveHiddenLayer) layer;
+        int layerSize = recurrentLayer.getNumberOfUnits ();
+        FullyConnectedLayer zeroContextLayer = new FullyConnectedLayer (layerSize, null);
+        zeroContextLayer.setOutput (zeros (layerSize));
+        
+        List <LayerWithOutput> inputForNextLayer = new ArrayList <> ();
+        inputForNextLayer.addAll (recurrentLayer.getInputLayers ());
+        inputForNextLayer.add (zeroContextLayer);
+        
+        // TODO.
+        for (int t = 0; t < k; t++) {
+            HiddenLayer unfoldedLayer = recurrentLayer.feedForwardCopy ();
+            Layers.connect (inputForNextLayer, unfoldedLayer);
+            hiddenLayers.add (i + t, unfoldedLayer);
             
-            Layers.connect (hiddenLayers.get (numberOfHiddenLayers - 1), outputLayer);
+            inputForNextLayer = new ArrayList <> ();
+            inputForNextLayer.add (unfoldedLayer);
+            inputForNextLayer.add (zeroContextLayer);
         }
+        
+        this.connectLayers ();
     }
     
-    public void forwardPass () {
-        hiddenLayers.forEach (hiddenLayer -> {
-            hiddenLayer.forwardPass ();
-        });
-        outputLayer.forwardPass ();
-    }
-    
-    public IL getInputLayer () {
-        return inputLayer;
-    }
-    
-    // Delegate method.
-    public double[] getOutput () {
-        return outputLayer.getOutput ();
-    }
-    
-    // Delegate method.
-    public int getOutputClassIndex () {
-        return outputLayer.getOutputClassIndex ();
-    }
-    
-    public OL getOutputLayer () {
-        return outputLayer;
-    }
-    
-    public void initializeWeights (long seed) {
-        hiddenLayers.forEach (hiddenLayer -> {
-            hiddenLayer.initializeWeights (seed);
-        });
-        outputLayer.initializeWeights (seed);
-    }
-    
-    // Delegate method.
-    public void setExpectedOutput (double expectedOutput) {
-        outputLayer.setExpectedOutput (expectedOutput);
-    }
-    
-    // Delegate method.
-    public void setInput (double[] input) {
-        inputLayer.setInput (input);
-    }
-    
-    public List<LayerParameters> getParameters() {
-        List<LayerParameters> parameters = new ArrayList<>();
-        for(LayerWithInput layer : hiddenLayers) {
-            parameters.add(layer.getParameters());
-        }
-        parameters.add(outputLayer.getParameters());
-        return parameters;
-    }
-    
-    public double getBatchError(List<OutputExample> batchOutput) {
-        return cost.getBatchError(batchOutput, getParameters());
+    private static double[] zeros (int n) {
+        double[] result = new double[n];
+        Arrays.fill (result, 0);
+        return result;
     }
 }

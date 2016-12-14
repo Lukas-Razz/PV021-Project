@@ -13,23 +13,23 @@ import cz.pv021.neuralnets.utils.OutputExample;
 import java.util.ArrayList;
 
 /**
- * @param <IL> Type of the input layer.
+ * @param <I> Type of input objects.
  * @param <OL> Type of the output layer.
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-17
- * @version 2016-12-10
+ * @version 2016-12-14
  */
-public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer> implements Network {
-    private final IL inputLayer;
-    private final List <HiddenLayer> hiddenLayers;
+public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network {
+    private final InputLayer <I> inputLayer;
+    private final List <HiddenLayer> hiddenLayers = new ArrayList <> ();
     private final OL outputLayer;
     private final Cost cost;
     private final Optimizer optimizer;
     
-    public MultilayerPerceptron (IL inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
+    public MultilayerPerceptron (InputLayer <I> inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
         this.inputLayer = inputLayer;
-        this.hiddenLayers = hiddenLayers;
+        this.hiddenLayers.addAll (hiddenLayers);
         this.outputLayer = outputLayer;
         this.cost = cost;
         this.optimizer = optimizer;
@@ -59,7 +59,7 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
         }
     }
     
-    private void connectLayers () {
+    protected void connectLayers () {
         if (hiddenLayers.isEmpty ()) {
             Layers.connect (inputLayer, outputLayer);
         }
@@ -82,7 +82,15 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
         outputLayer.forwardPass ();
     }
     
-    public IL getInputLayer () {
+    public double getBatchError (List <OutputExample> batchOutput) {
+        return cost.getBatchError (batchOutput, getParameters ());
+    }
+    
+    public List <HiddenLayer> getHiddenLayers () {
+        return hiddenLayers;
+    }
+    
+    public InputLayer <I> getInputLayer () {
         return inputLayer;
     }
     
@@ -100,6 +108,16 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
         return outputLayer;
     }
     
+    public List <LayerParameters> getParameters () {
+        List <LayerParameters> parameters = new ArrayList <> ();
+        for (LayerWithInput layer : hiddenLayers) {
+            parameters.add(layer.getParameters ());
+        }
+        parameters.add (outputLayer.getParameters ());
+        return parameters;
+    }
+    
+    @Override
     public void initializeWeights (long seed) {
         hiddenLayers.forEach (hiddenLayer -> {
             hiddenLayer.initializeWeights (seed);
@@ -117,16 +135,8 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
         inputLayer.setInput (input);
     }
     
-    public List<LayerParameters> getParameters() {
-        List<LayerParameters> parameters = new ArrayList<>();
-        for(LayerWithInput layer : hiddenLayers) {
-            parameters.add(layer.getParameters());
-        }
-        parameters.add(outputLayer.getParameters());
-        return parameters;
-    }
-    
-    public double getBatchError(List<OutputExample> batchOutput) {
-        return cost.getBatchError(batchOutput, getParameters());
+    // Delegate method.
+    public void setInputObject (I input) {
+        inputLayer.setInputObject (input);
     }
 }

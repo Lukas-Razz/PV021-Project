@@ -1,6 +1,7 @@
 package cz.pv021.neuralnets.layers;
 
 import cz.pv021.neuralnets.utils.LayerParameters;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -8,11 +9,11 @@ import java.util.List;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-08
- * @version 2016-12-11
+ * @version 2016-12-14
  */
 public interface LayerWithInput extends Layer {
     /**
-     * Zpětná propagace.
+     * Backpropagation.
      */ 
     public void backwardPass ();
 
@@ -21,24 +22,28 @@ public interface LayerWithInput extends Layer {
      */
     public void forwardPass ();
     
-    public List<LayerParameters> getErrors ();
+    public List <LayerParameters> getErrors ();
     
     public double[] getInnerPotentialGradient ();
     
     public LayerParameters getParameters ();
     
-    public LayerWithOutput getInputLayer ();
+    public List <LayerWithOutput> getInputLayers ();
     
     public void initializeWeights (long seed);
     
-    public void resetGradients();
+    public void resetGradients ();
     
     public void setParameters (LayerParameters parameters);
     
+    public default void setInputLayer (LayerWithOutput layer) {
+        this.setInputLayers (Collections.singletonList (layer));
+    }
+    
     /**
-     * Nastav předchozí vrstvu.
+     * Set the input (i.e. previous) layers.
      * 
-     * @param layer 
+     * @param layers
      */
-    public void setInputLayer (LayerWithOutput layer);
+    public void setInputLayers (List <LayerWithOutput> layers);
 }
