@@ -1,6 +1,6 @@
 package cz.pv021.neuralnets.layers;
 
-import cz.pv021.neuralnets.functions.ActivationFunction;
+import cz.pv021.neuralnets.functions.HiddenFunction;
 
 /**
  * Interface of hidden (middle) neural network layer. It is just a unification
@@ -11,7 +11,7 @@ import cz.pv021.neuralnets.functions.ActivationFunction;
  * @version 2016-12-14
  */
 public interface HiddenLayer extends LayerWithInput, LayerWithOutput {
-    public ActivationFunction getActivationFunction ();
+    public HiddenFunction getActivationFunction ();
     
     public double[] getInnerPotentials ();
 }

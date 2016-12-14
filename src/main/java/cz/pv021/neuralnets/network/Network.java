@@ -1,5 +1,7 @@
 package cz.pv021.neuralnets.network;
 
+import cz.pv021.neuralnets.initialization.Initializer;
+
 /**
  * Interface of neural network.
  * 
@@ -8,5 +10,5 @@ package cz.pv021.neuralnets.network;
  * @version 2016-12-13
  */
 public interface Network {
-    public void initializeWeights (long seed);
+    public void initializeWeights (Initializer initializer);
 }

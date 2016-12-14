@@ -1,12 +1,12 @@
 package cz.pv021.neuralnets.layers;
 
-import cz.pv021.neuralnets.functions.ActivationFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cz.pv021.neuralnets.functions.HiddenFunction;
 
 /**
  * @author  Lukáš Daubner
@@ -18,7 +18,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     
     private int id;
     
-    private final ActivationFunction activationFunction;
+    private final HiddenFunction activationFunction;
     private InputMerger inputMerger;
     private LayerWithInput outputLayer;
     private double[] bias;
@@ -30,7 +30,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     private List<double[][]> weightErrors;
     private double[][] weights;
 
-    public FullyConnectedLayer (int id, int numberOfUnits, ActivationFunction activationFunction) {
+    public FullyConnectedLayer (int id, int numberOfUnits, HiddenFunction activationFunction) {
         this.id = id;
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
@@ -78,7 +78,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     @Override
-    public ActivationFunction getActivationFunction () {
+    public HiddenFunction getActivationFunction () {
         return activationFunction;
     }
     
@@ -124,7 +124,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     
     @Override
     public LayerParameters getParameters () {
-        return new LayerParameters(weights, bias);
+        return new LayerParameters(weights, bias, id);
     }
     
     public List <double[][]> getWeightErrors () {
@@ -174,7 +174,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     public List<LayerParameters> getErrors () {
         List<LayerParameters> errors = new ArrayList<>();
         for(int i=0; i<weightErrors.size(); i++) {
-            errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
+            errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i), id));
         }
         return errors;
     }

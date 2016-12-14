@@ -19,9 +19,9 @@ public class SGD implements OptimizerAlgorithm {
     
     @Override
     public LayerParameters computeChange(List<LayerParameters> gradients) {        
-        LayerParameters avgGradient = gradients.get(0);
         int batchSize = gradients.size();
         
+        LayerParameters avgGradient = gradients.get(0);
         //Summing
         for(int k=1; k<batchSize; k++) {
             for(int i=0; i<gradients.get(k).getWeights().length; i++) {
