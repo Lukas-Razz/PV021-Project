@@ -48,12 +48,12 @@ public class MLP {
         Cost cost = new Cost (new SquaredError(), l1, l2);
         Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
         
-        InputLayer  layer0  = new InputLayerImpl (4);
-        HiddenLayer layer1a = new FullyConnectedLayer (10, new HyperbolicTangent());
-        HiddenLayer layer1b = new FullyConnectedLayer (10, new HyperbolicTangent());
-        OutputLayer layer2  = new OutputLayerImpl (3, new Softmax ());
+        InputLayer <double[]> layer0  = new InputLayerImpl (4);
+        HiddenLayer           layer1a = new FullyConnectedLayer (10, new HyperbolicTangent());
+        HiddenLayer           layer1b = new FullyConnectedLayer (10, new HyperbolicTangent());
+        OutputLayer           layer2  = new OutputLayerImpl (3, new Softmax ());
         
-        MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron = new MultilayerPerceptron <> (
+        MultilayerPerceptron <double[], OutputLayer> irisPerceptron = new MultilayerPerceptron <> (
             layer0,
             Arrays.asList (layer1a),
             layer2,
@@ -89,7 +89,7 @@ public class MLP {
         testIris (irisPerceptron, dataSet.getTestSet ());
     }
     
-    private static void runIrisEpoch (MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron, List<List<Example>> batches, int epoch) {
+    private static void runIrisEpoch (MultilayerPerceptron <?, ?> irisPerceptron, List<List<Example>> batches, int epoch) {
         // Set up the confusion matrix.
         int classes = IrisClass.values().length;
         int[][] confusionMatrix = new int[classes][classes];
@@ -134,7 +134,7 @@ public class MLP {
         System.out.println ("Epoch #" + epoch + ": average error = " + error);
     }
     
-     private static void testIris (MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron, List<Example> testSet) {
+     private static void testIris (MultilayerPerceptron <?, ?> irisPerceptron, List<Example> testSet) {
         // Set up the confusion matrix.
         int classes = IrisClass.values().length;
         int[][] confusionMatrix = new int[classes][classes];

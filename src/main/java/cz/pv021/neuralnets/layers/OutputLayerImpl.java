@@ -3,6 +3,7 @@ package cz.pv021.neuralnets.layers;
 import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.OutputFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
+import cz.pv021.neuralnets.utils.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,20 +19,21 @@ import org.slf4j.LoggerFactory;
  */
 public class OutputLayerImpl implements OutputLayer {
     final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
+    
     private Loss loss;
     private final OutputFunction outputFunction;
-    private final int numberOfUnits;
-    private LayerWithOutput inputLayer;
-    private double[][] weights;
+    private InputMerger inputLayers;
     private double[] bias;
-    private double[] innerPotentials;
+    private final List<double[]> biasErrors;
     // Error with respect to inner potentials = inner potential gradient.
-    private double[] err_wrt_innerP;
-    private List<double[][]> weightErrors;
-    private List<double[]> biasErrors;
-    private double[] output;
+    private final double[] err_wrt_innerP;
     private double expectedOutput;
-
+    private final double[] innerPotentials;
+    private final int numberOfUnits;
+    private double[] output;
+    private final List<double[][]> weightErrors;
+    private double[][] weights;
+    
     public OutputLayerImpl (int numberOfUnits, OutputFunction outputFunction) {
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
@@ -43,20 +45,19 @@ public class OutputLayerImpl implements OutputLayer {
         
         weightErrors = new ArrayList<>();
         biasErrors = new ArrayList<>();
-        
     }
     
     @Override
     public void backwardPass () {
-        double[][] err_wrt_weight = new double[numberOfUnits][inputLayer.getNumberOfUnits()];
+        double[][] err_wrt_weight = new double[numberOfUnits][inputLayers.getNumberOfUnits()];
         double[] preSoftmax = outputFunction.derivative(innerPotentials);
         
         for(int i=0; i<numberOfUnits; i++) {
             double error = i == expectedOutput ? loss.derivative(output[i], 1) : loss.derivative(output[i], 0); //pro klasifikaci
             err_wrt_innerP[i] = error * preSoftmax[i];
             
-            for(int j=0; j<inputLayer.getNumberOfUnits(); j++) {
-                err_wrt_weight[i][j] = err_wrt_innerP[i] * inputLayer.getOutput()[j]; // innerPotential of neuron "i" * output of neuron "j"
+            for(int j=0; j<inputLayers.getNumberOfUnits(); j++) {
+                err_wrt_weight[i][j] = err_wrt_innerP[i] * inputLayers.getOutput()[j]; // innerPotential of neuron "i" * output of neuron "j"
             }
         }
         biasErrors.add(err_wrt_innerP); // err_wrt_innerP = err_wrt_bias
@@ -66,7 +67,7 @@ public class OutputLayerImpl implements OutputLayer {
     @Override
     // Inner potential is remembered for backward pass.
     public void forwardPass () {
-        double[] input = inputLayer.getOutput ();
+        double[] input = inputLayers.getOutput ();
         
         for (int n = 0; n < numberOfUnits; n++) {
             innerPotentials[n] = bias[n];
@@ -91,7 +92,7 @@ public class OutputLayerImpl implements OutputLayer {
     }
     
     @Override
-    public List<LayerParameters> getErrors() {
+    public List <LayerParameters> getErrors () {
         List<LayerParameters> errors = new ArrayList<>();
         for(int i=0; i<weightErrors.size(); i++) {
             errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
@@ -100,13 +101,13 @@ public class OutputLayerImpl implements OutputLayer {
     }
     
     @Override
-    public double[] getInnerPotentialGradient() {
+    public double[] getInnerPotentialGradient () {
         return err_wrt_innerP;
     }
 
     @Override
-    public LayerWithOutput getInputLayer () {
-        return inputLayer;
+    public List <LayerWithOutput> getInputLayers () {
+        return inputLayers.getLayers ();
     }
     
     @Override
@@ -120,34 +121,34 @@ public class OutputLayerImpl implements OutputLayer {
     }
 
     @Override
-    public LayerParameters getParameters() {
+    public LayerParameters getParameters () {
         return new LayerParameters(weights, bias);
     }
     
     @Override
-    public void resetGradients() {
+    public void resetGradients () {
         biasErrors.clear();
         weightErrors.clear();
     }
 
     @Override
-    public void setExpectedOutput(double expectedOutput) {
+    public void setExpectedOutput (double expectedOutput) {
         this.expectedOutput = expectedOutput;
     }
 
     @Override
-    public void setInputLayer (LayerWithOutput layer) {
-        this.inputLayer = layer;
-        this.weights = new double[numberOfUnits][layer.getNumberOfUnits ()];
+    public void setInputLayers (List <LayerWithOutput> layers) {
+        this.inputLayers = new InputMerger (layers);
+        this.weights = new double[numberOfUnits][inputLayers.getNumberOfUnits ()];
     }
 
     @Override
-    public void setLoss(Loss loss) {
+    public void setLoss (Loss loss) {
         this.loss = loss;
     }
     
     @Override
-    public void setParameters(LayerParameters parameters) {
+    public void setParameters (LayerParameters parameters) {
         weights = parameters.getWeights();
         bias = parameters.getBias();
     }

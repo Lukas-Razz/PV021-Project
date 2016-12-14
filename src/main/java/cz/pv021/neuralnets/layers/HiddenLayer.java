@@ -8,8 +8,10 @@ import cz.pv021.neuralnets.functions.ActivationFunction;
  * 
  * @author  Josef Plch
  * @since   2016-11-07
- * @version 2016-12-12
+ * @version 2016-12-14
  */
 public interface HiddenLayer extends LayerWithInput, LayerWithOutput {
     public ActivationFunction getActivationFunction ();
+    
+    public double[] getInnerPotentials ();
 }
