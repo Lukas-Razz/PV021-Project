@@ -22,6 +22,7 @@ import cz.pv021.neuralnets.utils.OutputExample;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * @author  Lukáš Daubner, Josef Plch
@@ -54,7 +55,7 @@ public class MLP {
         OutputLayer           layer2  = new OutputLayerImpl (3, new Softmax ());
         
         MultilayerPerceptron <double[], OutputLayer> irisPerceptron = new MultilayerPerceptron <> (
-            layer0,
+            Arrays.asList (layer0),
             Arrays.asList (layer1a),
             layer2,
             cost,
@@ -106,7 +107,7 @@ public class MLP {
                 double[] attributes = example.getAttributes ();
                 int correctClassNumber = example.getExampleClass ().getIndex ();
 
-                irisPerceptron.getInputLayer ().setInput (attributes);
+                irisPerceptron.setInputs (Collections.singletonList (attributes));
                 irisPerceptron.forwardPass ();
                 irisPerceptron.setExpectedOutput (correctClassNumber);
                 irisPerceptron.backwardPass ();
@@ -134,7 +135,7 @@ public class MLP {
         System.out.println ("Epoch #" + epoch + ": average error = " + error);
     }
     
-     private static void testIris (MultilayerPerceptron <?, ?> irisPerceptron, List<Example> testSet) {
+    private static void testIris (MultilayerPerceptron <?, ?> irisPerceptron, List<Example> testSet) {
         // Set up the confusion matrix.
         int classes = IrisClass.values().length;
         int[][] confusionMatrix = new int[classes][classes];
@@ -148,7 +149,7 @@ public class MLP {
             double[] attributes = example.getAttributes ();
             int correctClassNumber = example.getExampleClass ().getIndex ();
 
-            irisPerceptron.getInputLayer ().setInput (attributes);
+            irisPerceptron.setInputs (Collections.singletonList (attributes));
             irisPerceptron.forwardPass ();
 
             int predictedClassNumber = irisPerceptron.getOutputClassIndex ();

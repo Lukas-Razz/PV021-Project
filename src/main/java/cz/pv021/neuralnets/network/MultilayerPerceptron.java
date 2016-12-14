@@ -4,6 +4,7 @@ import cz.pv021.neuralnets.error.Cost;
 import cz.pv021.neuralnets.layers.HiddenLayer;
 import cz.pv021.neuralnets.layers.InputLayer;
 import cz.pv021.neuralnets.layers.LayerWithInput;
+import cz.pv021.neuralnets.layers.LayerWithOutput;
 import cz.pv021.neuralnets.layers.Layers;
 import cz.pv021.neuralnets.layers.OutputLayer;
 import cz.pv021.neuralnets.utils.LayerParameters;
@@ -21,14 +22,14 @@ import java.util.ArrayList;
  * @version 2016-12-14
  */
 public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network {
-    private final InputLayer <I> inputLayer;
+    private final List <InputLayer <I>> inputLayers;
     private final List <HiddenLayer> hiddenLayers = new ArrayList <> ();
     private final OL outputLayer;
     private final Cost cost;
     private final Optimizer optimizer;
     
-    public MultilayerPerceptron (InputLayer <I> inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
-        this.inputLayer = inputLayer;
+    public MultilayerPerceptron (List <InputLayer <I>> inputLayers, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
+        this.inputLayers = inputLayers;
         this.hiddenLayers.addAll (hiddenLayers);
         this.outputLayer = outputLayer;
         this.cost = cost;
@@ -60,11 +61,13 @@ public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network
     }
     
     protected void connectLayers () {
+        List <LayerWithOutput> ils = new ArrayList <> (inputLayers);
+        
         if (hiddenLayers.isEmpty ()) {
-            Layers.connect (inputLayer, outputLayer);
+            Layers.connect (ils, outputLayer);
         }
         else {
-            Layers.connect (inputLayer, hiddenLayers.get (0));
+            Layers.connect (ils, hiddenLayers.get (0));
             
             int numberOfHiddenLayers = hiddenLayers.size ();
             for (int i = 0; i < numberOfHiddenLayers - 1; i++) {
@@ -90,8 +93,8 @@ public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network
         return hiddenLayers;
     }
     
-    public InputLayer <I> getInputLayer () {
-        return inputLayer;
+    public List <InputLayer <I>> getInputLayers () {
+        return inputLayers;
     }
     
     // Delegate method.
@@ -131,12 +134,16 @@ public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network
     }
     
     // Delegate method.
-    public void setInput (double[] input) {
-        inputLayer.setInput (input);
+    public void setInputs (List <double[]> inputs) {
+        for (int i = 0; i < inputs.size (); i++) {
+            inputLayers.get (i).setInput (inputs.get (i));
+        }
     }
     
     // Delegate method.
-    public void setInputObject (I input) {
-        inputLayer.setInputObject (input);
+    public void setInputObjects (List <I> inputs) {
+        for (int i = 0; i < inputs.size (); i++) {
+            inputLayers.get (i).setInputObject (inputs.get (i));
+        }
     }
 }

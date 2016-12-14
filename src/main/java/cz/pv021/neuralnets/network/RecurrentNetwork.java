@@ -38,8 +38,8 @@ import java.util.Arrays;
  * @version 2016-12-14
  */
 public class RecurrentNetwork <I, OL extends OutputLayer> extends MultilayerPerceptron {
-    public RecurrentNetwork (InputLayer <I> inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
-        super (inputLayer, hiddenLayers, outputLayer, cost, optimizer);
+    public RecurrentNetwork (List <InputLayer <I>> inputLayers, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
+        super (inputLayers, hiddenLayers, outputLayer, cost, optimizer);
     }
     
     // TODO: Folding and unfolding is completely wrong.
@@ -65,10 +65,11 @@ public class RecurrentNetwork <I, OL extends OutputLayer> extends MultilayerPerc
         // n = the length of the training sequence
         for (int t = 0; t < n - k; t++) {
             // Set the network inputs to x, a[t], a[t+1], ..., a[t+k-1]
-            this.getInputLayer().setInput (x);
+            List <InputLayer> inputLayers = this.getInputLayers ();
+            inputLayers.get(0).setInput (x);
             this.forwardPass ();
             for (int i = t; i < t+k-1; i++) {
-                this.getInputLayer().setInput (a.get (i));
+                inputLayers.get(0).setInput (a.get (i));
                 this.forwardPass ();
             }
             
@@ -90,6 +91,7 @@ public class RecurrentNetwork <I, OL extends OutputLayer> extends MultilayerPerc
     }
     
     // Let k layers collapse into a single recurent one.
+    // See the class documentation.
     private void fold (int i, int k) {
         List <HiddenLayer> hiddenLayers = this.getHiddenLayers ();
         
@@ -126,6 +128,7 @@ public class RecurrentNetwork <I, OL extends OutputLayer> extends MultilayerPerc
         this.connectLayers ();
     }
     
+    // See the class documentation.
     private void unfold (int i, int k) {
         List <HiddenLayer> hiddenLayers = this.getHiddenLayers ();
         HiddenLayer layer = hiddenLayers.get (i);

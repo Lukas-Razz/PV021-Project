@@ -48,7 +48,7 @@ public class RnnDemo {
         OutputLayer    layer2 = new OutputLayerImpl (4, new Softmax ());
         
         RecurrentNetwork <Byte, OutputLayer> network = new RecurrentNetwork <> (
-            layer0,
+            Arrays.asList (layer0),
             Arrays.asList (layer1),
             layer2,
             cost,
