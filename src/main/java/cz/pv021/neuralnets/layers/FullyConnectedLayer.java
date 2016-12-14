@@ -11,10 +11,12 @@ import org.slf4j.LoggerFactory;
 /**
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-07
+ * @version 2016-12-14
  */
 public class FullyConnectedLayer implements HiddenLayer {
     private final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
+    
+    private int id;
     
     private final ActivationFunction activationFunction;
     private InputMerger inputMerger;
@@ -28,7 +30,8 @@ public class FullyConnectedLayer implements HiddenLayer {
     private List<double[][]> weightErrors;
     private double[][] weights;
 
-    public FullyConnectedLayer (int numberOfUnits, ActivationFunction activationFunction) {
+    public FullyConnectedLayer (int id, int numberOfUnits, ActivationFunction activationFunction) {
+        this.id = id;
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
         this.bias = new double[numberOfUnits];
@@ -208,5 +211,10 @@ public class FullyConnectedLayer implements HiddenLayer {
     
     public void setWeights (double[][] weights) {
         this.weights = weights;
+    }
+    
+    @Override
+    public int getId() {
+        return id;
     }
 }

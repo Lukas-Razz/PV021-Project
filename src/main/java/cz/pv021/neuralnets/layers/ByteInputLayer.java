@@ -5,11 +5,16 @@ import cz.pv021.neuralnets.utils.ByteUtils;
 /**
  * @author  Josef Plch
  * @since   2016-11-21
- * @version 2016-12-13
+ * @version 2016-12-14
  */
 public class ByteInputLayer implements InputLayer <Byte> {
+    
     private static final int SIZE = 256;
-    private final InputLayer delegate = new InputLayerImpl (SIZE);
+    private final InputLayer delegate;
+
+    public ByteInputLayer(int id) {
+        delegate = new InputLayerImpl (id, SIZE);
+    }
     
     @Override
     public int getNumberOfUnits () {
@@ -39,5 +44,10 @@ public class ByteInputLayer implements InputLayer <Byte> {
     @Override
     public void setOutputLayer (LayerWithInput layer) {
         this.delegate.setOutputLayer (layer);
+    }
+    
+    @Override
+    public int getId() {
+        return delegate.getId();
     }
 }
