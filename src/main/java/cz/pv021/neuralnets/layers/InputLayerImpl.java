@@ -8,15 +8,19 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-13
+ * @version 2016-12-14
  */
 public class InputLayerImpl implements InputLayer <double[]> {
     final Logger logger = LoggerFactory.getLogger (InputLayerImpl.class);
+    
+    private int id;
+    
     private LayerWithInput outputLayer;
     private final int numberOfUnits;
     private double[] output;
     
-    public InputLayerImpl (int numberOfUnits) {
+    public InputLayerImpl (int id, int numberOfUnits) {
+        this.id = id;
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
     }
@@ -49,5 +53,10 @@ public class InputLayerImpl implements InputLayer <double[]> {
     @Override
     public void setOutputLayer (LayerWithInput layer) {
         this.outputLayer = layer;
+    }
+
+    @Override
+    public int getId() {
+        return id;
     }
 }
