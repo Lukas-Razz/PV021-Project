@@ -13,11 +13,6 @@ public class LayerParameters {
     private double[] bias;
     
     private int layerId;
-
-    public LayerParameters(double[][] weights, double[] bias) {
-        this.weights = weights;
-        this.bias = bias;
-    }
     
     public LayerParameters(double[][] weights, double[] bias, int layerId) {
         this.weights = weights;
