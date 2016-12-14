@@ -101,6 +101,7 @@ public class RecurrentNetwork <I, OL extends OutputLayer> extends MultilayerPerc
         HiddenLayer firstUnfolded = unfoldedLayers.get (0);
         int layerSize = firstUnfolded.getNumberOfUnits ();
         FullyConnectedRecursiveLayer folded = new FullyConnectedRecursiveLayer (
+            -1, //IDčko
             layerSize,
             firstUnfolded.getActivationFunction ()
         );
@@ -136,7 +137,7 @@ public class RecurrentNetwork <I, OL extends OutputLayer> extends MultilayerPerc
         hiddenLayers.remove (i);
         RecursiveHiddenLayer recurrentLayer = (RecursiveHiddenLayer) layer;
         int layerSize = recurrentLayer.getNumberOfUnits ();
-        FullyConnectedLayer zeroContextLayer = new FullyConnectedLayer (layerSize, null);
+        FullyConnectedLayer zeroContextLayer = new FullyConnectedLayer (-1, layerSize, null); //IDčko
         zeroContextLayer.setOutput (zeros (layerSize));
         
         List <LayerWithOutput> inputForNextLayer = new ArrayList <> ();

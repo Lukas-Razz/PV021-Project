@@ -11,15 +11,18 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-10-30
- * @version 2016-12-12
+ * @version 2016-12-14
  */
 public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements RecursiveHiddenLayer {
     private final Logger logger = LoggerFactory.getLogger (FullyConnectedRecursiveLayer.class);
+    
+    private int id;
+    
     private double[][] loopWeights;
     private final int layerSize;
 
-    public FullyConnectedRecursiveLayer (int numberOfUnits, ActivationFunction activationFunction) {
-        super (numberOfUnits, activationFunction);
+    public FullyConnectedRecursiveLayer (int id, int numberOfUnits, ActivationFunction activationFunction) {
+        super (id, numberOfUnits, activationFunction);
         this.loopWeights = new double[numberOfUnits][numberOfUnits];
         this.layerSize = numberOfUnits;
     }
@@ -27,7 +30,7 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
     // TODO
     @Override
     public FullyConnectedLayer feedForwardCopy () {
-        FullyConnectedLayer clone = new FullyConnectedLayer (this.getNumberOfUnits (), this.getActivationFunction ());
+        FullyConnectedLayer clone = new FullyConnectedLayer (id, this.getNumberOfUnits (), this.getActivationFunction ());
         clone.setBias            (this.getBias ());
         clone.setBiasErrors      (this.getBiasErrors ());
         clone.setErrWrtInnerP    (this.getErrWrtInnerP ());

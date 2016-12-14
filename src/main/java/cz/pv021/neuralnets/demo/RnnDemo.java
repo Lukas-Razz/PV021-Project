@@ -43,9 +43,9 @@ public class RnnDemo {
         Cost cost = new Cost (new SquaredError(), l1, l2);
         Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
         
-        ByteInputLayer layer0 = new ByteInputLayer ();
-        HiddenLayer    layer1 = new FullyConnectedRecursiveLayer (5, new HyperbolicTangent());
-        OutputLayer    layer2 = new OutputLayerImpl (4, new Softmax ());
+        ByteInputLayer layer0 = new ByteInputLayer (0);
+        HiddenLayer    layer1 = new FullyConnectedRecursiveLayer (1, 5, new HyperbolicTangent());
+        OutputLayer    layer2 = new OutputLayerImpl (2, 4, new Softmax ());
         
         RecurrentNetwork <Byte, OutputLayer> network = new RecurrentNetwork <> (
             layer0,

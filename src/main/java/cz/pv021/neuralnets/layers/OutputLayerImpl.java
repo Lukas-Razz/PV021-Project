@@ -15,10 +15,12 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-13
+ * @version 2016-12-14
  */
 public class OutputLayerImpl implements OutputLayer {
     final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
+    
+    private int id;
     
     private Loss loss;
     private final OutputFunction outputFunction;
@@ -34,7 +36,8 @@ public class OutputLayerImpl implements OutputLayer {
     private final List<double[][]> weightErrors;
     private double[][] weights;
     
-    public OutputLayerImpl (int numberOfUnits, OutputFunction outputFunction) {
+    public OutputLayerImpl (int id, int numberOfUnits, OutputFunction outputFunction) {
+        this.id = id;
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
         this.bias = new double[numberOfUnits];
@@ -151,5 +154,10 @@ public class OutputLayerImpl implements OutputLayer {
     public void setParameters (LayerParameters parameters) {
         weights = parameters.getWeights();
         bias = parameters.getBias();
+    }
+    
+    @Override
+    public int getId() {
+        return id;
     }
 }
