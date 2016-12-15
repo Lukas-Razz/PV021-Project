@@ -4,9 +4,12 @@ package cz.pv021.neuralnets.functions;
  *
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-13
+ * @version 2016-12-14
  */
 public class Softmax implements OutputFunction {
+    
+    private final InitializationStrategy strategy = InitializationStrategy.SigmoidLike;
+    
     @Override
     public double[] apply (double[] innerPotentials) {
         double[] output = new double[innerPotentials.length];
@@ -38,5 +41,10 @@ public class Softmax implements OutputFunction {
             output[i] = apply[i] * (1 - apply[i]);
         }
         return output;
+    }
+    
+    @Override
+    public InitializationStrategy getInitializationStrategy() {
+        return strategy;
     }
 }

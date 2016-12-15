@@ -61,9 +61,6 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
         );
     }
     
-    // TODO: Folding and unfolding is completely wrong.
-    // (Má se rozkládat do šířky, ne do hloubky.)
-    //
     // a[t] is the input at time t.
     // y[t] is the output
     public void backpropagationThroughTime (List <double[]> inputSequence, double expectedOutput) {   
@@ -83,11 +80,13 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
         for (int t = 0; t < sequenceLength - k; t++) {
             // Set the network inputs to x, a[t], a[t+1], ..., a[t+k-1]
             List <IL> inputLayers = this.getInputLayers ();
+            List <HiddenLayer> hiddenLayers = this.getHiddenLayers ();
             for (int i = 0; i < k; i++) {
                 IL inputLayer = inputLayers.get (i);
                 inputLayer.setInput (inputSequence.get (t + i));
-                this.forwardPass ();
+                hiddenLayers.get(i).forwardPass ();
             }
+            this.getOutputLayer().backwardPass();
             
             // p = forward-propagate the inputs over the whole unfolded network
             // error = target - prediction

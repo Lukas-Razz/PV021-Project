@@ -1,6 +1,7 @@
 package cz.pv021.neuralnets.layers;
 
 import cz.pv021.neuralnets.error.Loss;
+import cz.pv021.neuralnets.functions.OutputFunction;
 
 /**
  * Output layer interface.
@@ -35,4 +36,6 @@ public interface OutputLayer extends LayerWithInput {
     public void setExpectedOutput (double expectedOutput);
     
     public void setLoss (Loss loss);
+    
+    public OutputFunction getActivationFunction();
 }

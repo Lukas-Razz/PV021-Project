@@ -84,7 +84,7 @@ public class OutputLayerImpl implements OutputLayer {
     public List <LayerParameters> getErrors () {
         List<LayerParameters> errors = new ArrayList<>();
         for(int i=0; i<weightErrors.size(); i++) {
-            errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
+            errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i), id));
         }
         return errors;
     }
@@ -116,7 +116,7 @@ public class OutputLayerImpl implements OutputLayer {
 
     @Override
     public LayerParameters getParameters () {
-        return new LayerParameters(weights, bias);
+        return new LayerParameters(weights, bias, id);
     }
     
     @Override
@@ -152,6 +152,11 @@ public class OutputLayerImpl implements OutputLayer {
     @Override
     public void setLoss (Loss loss) {
         this.loss = loss;
+    }
+    
+    @Override
+    public OutputFunction getActivationFunction() {
+        return outputFunction;
     }
     
     @Override

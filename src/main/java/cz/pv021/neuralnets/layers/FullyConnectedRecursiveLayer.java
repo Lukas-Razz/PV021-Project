@@ -1,9 +1,9 @@
 package cz.pv021.neuralnets.layers;
 
-import cz.pv021.neuralnets.functions.ActivationFunction;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cz.pv021.neuralnets.functions.HiddenFunction;
 
 /**
  * A recursive layer, i.e. layer with self-loops.
@@ -14,11 +14,10 @@ import org.slf4j.LoggerFactory;
  */
 public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements RecurrentHiddenLayer {
     private final Logger logger = LoggerFactory.getLogger (FullyConnectedRecursiveLayer.class);
-    
     private double[][] loopWeights;
     private final int layerSize;
 
-    public FullyConnectedRecursiveLayer (int id, int numberOfUnits, ActivationFunction activationFunction) {
+    public FullyConnectedRecursiveLayer (int id, int numberOfUnits, HiddenFunction activationFunction) {
         super (id, numberOfUnits, activationFunction);
         this.loopWeights = new double[numberOfUnits][numberOfUnits];
         this.layerSize = numberOfUnits;
@@ -29,11 +28,12 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
         throw new UnsupportedOperationException ("Not supported! Use backpropagation on unfolded network.");
     }
     
+    /*
     @Override
     public void forwardPass () {
         double[] input = this.getInputMerger().getOutput();
         
-        ActivationFunction activationFunction = this.getActivationFunction ();
+        HiddenFunction activationFunction = this.getActivationFunction ();
         double[] bias = this.getBias ();
         double[][] forwardWeights = this.getWeights ();
         double[] innerPotentials = this.getInnerPotentials ();
@@ -53,7 +53,10 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
         
         this.setOutput (output);
     }
+    */
     
+    /*
+    @Deprecated
     @Override
     public void initializeWeights (long seed) {
         super.initializeWeights (seed);
@@ -67,6 +70,7 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
             }
         }
     }
+    */
     
     // TODO
     @Override

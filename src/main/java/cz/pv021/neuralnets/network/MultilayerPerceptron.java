@@ -1,6 +1,8 @@
 package cz.pv021.neuralnets.network;
 
 import cz.pv021.neuralnets.error.Cost;
+import cz.pv021.neuralnets.initialization.Initialization;
+import cz.pv021.neuralnets.initialization.Initializer;
 import cz.pv021.neuralnets.layers.HiddenLayer;
 import cz.pv021.neuralnets.layers.InputLayer;
 import cz.pv021.neuralnets.layers.LayerWithInput;
@@ -134,11 +136,11 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
     }
     
     @Override
-    public void initializeWeights (long seed) {
+    public void initializeWeights (Initializer initializer) {
         hiddenLayers.forEach (hiddenLayer -> {
-            hiddenLayer.initializeWeights (seed);
+            initializer.initialize (hiddenLayer.getParameters (), hiddenLayer.getActivationFunction ());
         });
-        outputLayer.initializeWeights (seed);
+        initializer.initialize(outputLayer.getParameters(), outputLayer.getActivationFunction());
     }
     
     // Delegate method.

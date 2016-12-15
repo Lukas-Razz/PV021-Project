@@ -4,8 +4,9 @@ import cz.pv021.neuralnets.dataset.DataSet;
 import cz.pv021.neuralnets.dataset.Example;
 import cz.pv021.neuralnets.dataset.iris.IrisReader;
 import cz.pv021.neuralnets.dataset.iris.IrisClass;
-import cz.pv021.neuralnets.optimizers.SGD;
+import cz.pv021.neuralnets.optimizers.*;
 import cz.pv021.neuralnets.error.*;
+import cz.pv021.neuralnets.initialization.*;
 import cz.pv021.neuralnets.layers.*;
 import cz.pv021.neuralnets.functions.*;
 import cz.pv021.neuralnets.network.MultilayerPerceptron;
@@ -16,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cz.pv021.neuralnets.optimizers.Optimizer;
 import cz.pv021.neuralnets.utils.ModelStatistics;
 import cz.pv021.neuralnets.utils.OutputExample;
 import java.io.IOException;
@@ -42,17 +42,20 @@ public class MLP {
     }
     
     private static void testIris () throws IOException {
-        double learningRate = 0.01;
+        double learningRate = 0.1;
+        double momentum = 0.2;
         double l1 = 0.00;
         double l2 = 0.0001;
         
-        Cost cost = new Cost (new SquaredError(), l1, l2);
-        Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
+        Cost cost = new Cost (new RootMeanSquaredError(), l1, l2);
+        Optimizer optimizer = new Optimizer(learningRate, new AdaGrad(), momentum, l1, l2);
         
         InputLayer  layer0  = new InputLayerImpl (0, 4);
         HiddenLayer layer1a = new FullyConnectedLayer (1, 10, new HyperbolicTangent());
         HiddenLayer layer1b = new FullyConnectedLayer (2, 10, new HyperbolicTangent());
         OutputLayer layer2  = new OutputLayerImpl (3, 3, new Softmax ());
+        
+        Initializer initializer = new Initializer (new NormalInitialization (123456));
         
         MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron = new MultilayerPerceptron <> (
             Arrays.asList (layer0),
@@ -61,7 +64,7 @@ public class MLP {
             cost,
             optimizer
         );
-        irisPerceptron.initializeWeights (123456789);
+        irisPerceptron.initializeWeights (initializer);
         
         String irisTrainFile = "./data/iris/Iris_train.data";
         Path irisTrainFilePath = FileSystems.getDefault().getPath (irisTrainFile);
@@ -83,7 +86,7 @@ public class MLP {
         // TODO: Loss má teď zadrátováno že je jen pro klasifikaci, to se může zobecnit
         final int bachSize = 1;
         List<List<Example>> batches = dataSet.splitToBatch(bachSize);
-        for (int epoch = 0; epoch < 50; epoch++) {
+        for (int epoch = 0; epoch < 6; epoch++) {
             runIrisEpoch (irisPerceptron, batches, epoch);
         }
         
@@ -116,7 +119,6 @@ public class MLP {
                 int predictedClassNumber = irisPerceptron.getOutputClassIndex ();
                 confusionMatrix[correctClassNumber][predictedClassNumber]++;
                 
-                // TODO: chtělo by to vypsat error celé jedné dávky (metoda je na to připdavena v Cost)
                 /*
                 System.out.println (
                     "Output in epoch #" + epoch + ":"
@@ -155,7 +157,6 @@ public class MLP {
             int predictedClassNumber = irisPerceptron.getOutputClassIndex ();
             confusionMatrix[correctClassNumber][predictedClassNumber]++;
 
-            // TODO: chtělo by to vypsat error celé jedné dávky (metoda je na to připdavena v Cost)
             /*
             System.out.println (
                 "Output in epoch #" + epoch + ":"

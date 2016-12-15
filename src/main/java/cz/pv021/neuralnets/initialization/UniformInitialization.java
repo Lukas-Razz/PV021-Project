@@ -1,4 +1,4 @@
-package cz.pv021.neralnets.initialization;
+package cz.pv021.neuralnets.initialization;
 
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.Random;
@@ -8,12 +8,18 @@ import java.util.Random;
  * 
  * @author  Lukáš Daubner
  * @since   2016-12-10
- * @version 2016-12-10
+ * @version 2016-12-14
  */
 public class UniformInitialization implements Initialization {
     
+    private final int seed;
+    
+    public UniformInitialization(int seed) {
+        this.seed = seed;
+    }
+    
     @Override
-    public LayerParameters initializeTANHLike(LayerParameters parameters, int seed) {
+    public LayerParameters initializeTANHLike(LayerParameters parameters) {
         Random random = new Random (seed);
         for (int i = 0; i < parameters.getWeights().length; i++) {
             for (int j = 0; j < parameters.getWeights()[i].length; j++) {
@@ -27,7 +33,7 @@ public class UniformInitialization implements Initialization {
     }
     
     @Override
-    public LayerParameters initializeSIGMOIDLike(LayerParameters parameters, int seed) {
+    public LayerParameters initializeSIGMOIDLike(LayerParameters parameters) {
         Random random = new Random (seed);
         for (int i = 0; i < parameters.getWeights().length; i++) {
             for (int j = 0; j < parameters.getWeights()[i].length; j++) {

@@ -1,24 +1,25 @@
 package cz.pv021.neuralnets.functions;
 
+import static java.lang.Math.*;
+
 /**
  *
  * @author  Lukáš Daubner
- * @since   2016-10-30
+ * @since   2016-12-14
  * @version 2016-12-14
  */
-public class HyperbolicTangent implements HiddenFunction {
+public class Sigmoid implements HiddenFunction {
     
-    private final InitializationStrategy strategy = InitializationStrategy.TanhLike;
+    private final InitializationStrategy strategy = InitializationStrategy.SigmoidLike;
     
     @Override
     public double apply (double innerPotential) {
-        return Math.tanh (innerPotential);
+        return 1/1+pow(E, -innerPotential);
     }
 
     @Override
     public double derivative (double innerPotential) {
-        // 1 - tanh^2 x = 1 / cos^2 x
-        return (1 - Math.pow (Math.tanh (innerPotential), 2));
+        return apply(innerPotential)*(1-apply(innerPotential));
     }
 
     @Override

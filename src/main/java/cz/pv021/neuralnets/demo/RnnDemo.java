@@ -4,6 +4,8 @@ import cz.pv021.neuralnets.optimizers.SGD;
 import cz.pv021.neuralnets.error.*;
 import cz.pv021.neuralnets.layers.*;
 import cz.pv021.neuralnets.functions.*;
+import cz.pv021.neuralnets.initialization.Initializer;
+import cz.pv021.neuralnets.initialization.NormalInitialization;
 import cz.pv021.neuralnets.network.RecurrentNetwork;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
@@ -37,14 +39,17 @@ public class RnnDemo {
     
     private static void testSentences () throws IOException {
         double learningRate = 0.01;
+        double momentum = 0.0;
         double l1 = 0.00;
         double l2 = 0.0001;
         
-        Cost cost = new Cost (new SquaredError(), l1, l2);
-        Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
+        Cost cost = new Cost (new MeanSquaredError(), l1, l2);
+        Optimizer optimizer = new Optimizer(learningRate, new SGD(), momentum, l1, l2);
         
-        // InputLayer                   layer0 = new InputLayerImpl (0, 4);
-        InputLayer                   layer0 = new ByteInputLayer (0);
+        Initializer initializer = new Initializer (new NormalInitialization (123456));
+        
+        InputLayer                   layer0 = new InputLayerImpl (0, 4);
+        // InputLayer                   layer0 = new ByteInputLayer (0);
         FullyConnectedRecursiveLayer layer1 = new FullyConnectedRecursiveLayer (1, 3, new HyperbolicTangent());
         OutputLayer                  layer2 = new OutputLayerImpl (2, 4, new Softmax ());
         
@@ -55,7 +60,7 @@ public class RnnDemo {
             cost,
             optimizer
         );
-        rnn.initializeWeights (100);
+        rnn.initializeWeights (initializer);
         
         String csDataPath = "./data/language_identification/cs_sentences.txt";
         Path csDataFilePath = FileSystems.getDefault().getPath (csDataPath);
@@ -81,8 +86,8 @@ public class RnnDemo {
                 x[1]=0.222;
                 x[2]=0.333;
                 x[3]=0.444;
-                //attributeSequence.add (x);
-                attributeSequence.add (ByteUtils.byteToOneHotVector (byte8));
+                attributeSequence.add (x);
+                // attributeSequence.add (ByteUtils.byteToOneHotVector (byte8));
             }
             
             int classNumber = 2;

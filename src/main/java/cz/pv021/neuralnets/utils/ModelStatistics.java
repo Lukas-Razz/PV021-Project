@@ -13,7 +13,7 @@ public abstract class ModelStatistics {
     private static final DecimalFormat DEFAULT_DECIMAL_FORMAT = createDefaultDecimalFormat ();
     
     private static DecimalFormat createDefaultDecimalFormat () {
-        DecimalFormat format = new DecimalFormat ("#.0");
+        DecimalFormat format = new DecimalFormat ("0.0");
         DecimalFormatSymbols formatSymbols = new  DecimalFormatSymbols ();
         formatSymbols.setDecimalSeparator ('.');
         format.setDecimalFormatSymbols (formatSymbols);
