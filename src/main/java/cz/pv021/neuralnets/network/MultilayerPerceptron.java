@@ -6,6 +6,7 @@ import cz.pv021.neuralnets.initialization.Initializer;
 import cz.pv021.neuralnets.layers.HiddenLayer;
 import cz.pv021.neuralnets.layers.InputLayer;
 import cz.pv021.neuralnets.layers.LayerWithInput;
+import cz.pv021.neuralnets.layers.LayerWithOutput;
 import cz.pv021.neuralnets.layers.Layers;
 import cz.pv021.neuralnets.layers.OutputLayer;
 import cz.pv021.neuralnets.utils.LayerParameters;
@@ -15,22 +16,22 @@ import cz.pv021.neuralnets.utils.OutputExample;
 import java.util.ArrayList;
 
 /**
- * @param <I> Type of input objects.
+ * @param <IL> Type of the input layers.
  * @param <OL> Type of the output layer.
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-17
- * @version 2016-12-14
+ * @version 2016-12-15
  */
-public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network {
-    private final InputLayer <I> inputLayer;
+public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer> implements Network {
+    private final List <IL> inputLayers = new ArrayList <> ();
     private final List <HiddenLayer> hiddenLayers = new ArrayList <> ();
     private final OL outputLayer;
     private final Cost cost;
     private final Optimizer optimizer;
     
-    public MultilayerPerceptron (InputLayer <I> inputLayer, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
-        this.inputLayer = inputLayer;
+    public MultilayerPerceptron (List <IL> inputLayers, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
+        this.inputLayers.addAll (inputLayers);
         this.hiddenLayers.addAll (hiddenLayers);
         this.outputLayer = outputLayer;
         this.cost = cost;
@@ -62,11 +63,13 @@ public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network
     }
     
     protected void connectLayers () {
+        List <LayerWithOutput> ils = new ArrayList <> (inputLayers);
+        
         if (hiddenLayers.isEmpty ()) {
-            Layers.connect (inputLayer, outputLayer);
+            Layers.connect (ils, outputLayer);
         }
         else {
-            Layers.connect (inputLayer, hiddenLayers.get (0));
+            Layers.connect (ils, hiddenLayers.get (0));
             
             int numberOfHiddenLayers = hiddenLayers.size ();
             for (int i = 0; i < numberOfHiddenLayers - 1; i++) {
@@ -92,8 +95,21 @@ public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network
         return hiddenLayers;
     }
     
-    public InputLayer <I> getInputLayer () {
-        return inputLayer;
+    public List <IL> getInputLayers () {
+        return inputLayers;
+    }
+    
+    @Override
+    public int getNumberOfUnits () {
+        int sum = 0;
+        for (IL inputLayer : inputLayers) {
+            sum += inputLayer.getNumberOfUnits ();
+        }
+        for (HiddenLayer hiddenLayer : hiddenLayers) {
+            sum += hiddenLayer.getNumberOfUnits ();
+        }
+        sum += outputLayer.getNumberOfUnits ();
+        return sum;
     }
     
     // Delegate method.
@@ -122,7 +138,7 @@ public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network
     @Override
     public void initializeWeights (Initializer initializer) {
         hiddenLayers.forEach (hiddenLayer -> {
-            initializer.initialize(hiddenLayer.getParameters(), hiddenLayer.getActivationFunction());
+            initializer.initialize (hiddenLayer.getParameters (), hiddenLayer.getActivationFunction ());
         });
         initializer.initialize(outputLayer.getParameters(), outputLayer.getActivationFunction());
     }
@@ -133,12 +149,20 @@ public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network
     }
     
     // Delegate method.
-    public void setInput (double[] input) {
-        inputLayer.setInput (input);
+    public void setInputs (List <double[]> inputs) {
+        for (int i = 0; i < inputs.size (); i++) {
+            inputLayers.get (i).setInput (inputs.get (i));
+        }
     }
     
-    // Delegate method.
-    public void setInputObject (I input) {
-        inputLayer.setInputObject (input);
+    @Override
+    public String toString () {
+        return (
+            "MultilayerPerceptron (" + this.getNumberOfUnits() + " neurons) {"
+                + "\n    inputLayers=" + inputLayers
+                + ",\n    hiddenLayers=" + hiddenLayers
+                + ",\n    outputLayer=" + outputLayer
+            + "\n}"
+        );
     }
 }

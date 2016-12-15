@@ -1,6 +1,5 @@
 package cz.pv021.neuralnets.layers;
 
-import java.util.Arrays;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,13 +10,10 @@ import cz.pv021.neuralnets.functions.HiddenFunction;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-10-30
- * @version 2016-12-14
+ * @version 2016-12-15
  */
-public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements RecursiveHiddenLayer {
+public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements RecurrentHiddenLayer {
     private final Logger logger = LoggerFactory.getLogger (FullyConnectedRecursiveLayer.class);
-    
-    private int id;
-    
     private double[][] loopWeights;
     private final int layerSize;
 
@@ -27,25 +23,12 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
         this.layerSize = numberOfUnits;
     }
     
-    // TODO
-    @Override
-    public FullyConnectedLayer feedForwardCopy () {
-        FullyConnectedLayer clone = new FullyConnectedLayer (id, this.getNumberOfUnits (), this.getActivationFunction ());
-        clone.setBias            (this.getBias ());
-        clone.setBiasErrors      (this.getBiasErrors ());
-        clone.setErrWrtInnerP    (this.getErrWrtInnerP ());
-        clone.setInnerPotentials (this.getInnerPotentials ());
-        clone.setOutput          (this.getOutput ());
-        clone.setWeightErrors    (this.getWeightErrors ());
-        clone.setWeights         (this.getWeights ());
-        return clone;
-    }
-    
     @Override
     public void backwardPass () {
         throw new UnsupportedOperationException ("Not supported! Use backpropagation on unfolded network.");
     }
     
+    /*
     @Override
     public void forwardPass () {
         double[] input = this.getInputMerger().getOutput();
@@ -70,7 +53,10 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
         
         this.setOutput (output);
     }
+    */
     
+    /*
+    @Deprecated
     @Override
     public void initializeWeights (long seed) {
         super.initializeWeights (seed);
@@ -83,6 +69,26 @@ public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements
                 this.loopWeights[i][i2] = uniformRandom (random, -x, x);
             }
         }
+    }
+    */
+    
+    // TODO
+    @Override
+    public FullyConnectedLayer makeNonRecurrentCopy (int id) {
+        FullyConnectedLayer copy = new FullyConnectedLayer (id, this.getNumberOfUnits (), this.getActivationFunction ());
+        copy.setBias            (this.getBias ());
+        copy.setBiasErrors      (this.getBiasErrors ());
+        copy.setErrWrtInnerP    (this.getErrWrtInnerP ());
+        copy.setInnerPotentials (this.getInnerPotentials ());
+        copy.setOutput          (this.getOutput ());
+        copy.setWeightErrors    (this.getWeightErrors ());
+        copy.setWeights         (this.getWeights ());
+        return copy;
+    }
+    
+    @Override
+    public String toString () {
+        return ("FullyConnectedRecurrentLayer {id=" + this.getId () + "}");
     }
     
     private static double uniformRandom (Random random, double from, double to) {

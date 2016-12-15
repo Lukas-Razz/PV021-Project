@@ -20,8 +20,7 @@ import org.slf4j.LoggerFactory;
 public class OutputLayerImpl implements OutputLayer {
     final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
     
-    private int id;
-    
+    private final int id;
     private Loss loss;
     private final OutputFunction outputFunction;
     private InputMerger inputLayers;
@@ -82,25 +81,17 @@ public class OutputLayerImpl implements OutputLayer {
     }
     
     @Override
-    public void initializeWeights (long seed) {
-        Random r = new Random (seed);
-        for (int i = 0; i < weights.length; i++) {
-            for (int j = 0; j < weights[i].length; j++) {
-                weights[i][j] = Math.abs(r.nextGaussian ()); //Softmax nerad minus
-            }
-        }
-        for (int i = 0; i < bias.length; i++) {
-            bias[i] = 0;
-        }
-    }
-    
-    @Override
     public List <LayerParameters> getErrors () {
         List<LayerParameters> errors = new ArrayList<>();
         for(int i=0; i<weightErrors.size(); i++) {
             errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i), id));
         }
         return errors;
+    }
+    
+    @Override
+    public int getId () {
+        return id;
     }
     
     @Override
@@ -126,6 +117,19 @@ public class OutputLayerImpl implements OutputLayer {
     @Override
     public LayerParameters getParameters () {
         return new LayerParameters(weights, bias, id);
+    }
+    
+    @Override
+    public void initializeWeights (long seed) {
+        Random r = new Random (seed);
+        for (int i = 0; i < weights.length; i++) {
+            for (int j = 0; j < weights[i].length; j++) {
+                weights[i][j] = Math.abs(r.nextGaussian ()); //Softmax nerad minus
+            }
+        }
+        for (int i = 0; i < bias.length; i++) {
+            bias[i] = 0;
+        }
     }
     
     @Override
@@ -162,7 +166,7 @@ public class OutputLayerImpl implements OutputLayer {
     }
     
     @Override
-    public int getId() {
-        return id;
+    public String toString () {
+        return ("OutputLayerImpl {id=" + id + "}");
     }
 }

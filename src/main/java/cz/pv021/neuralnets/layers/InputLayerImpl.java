@@ -8,13 +8,11 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-14
+ * @version 2016-12-15
  */
-public class InputLayerImpl implements InputLayer <double[]> {
+public class InputLayerImpl implements InputLayer {
     final Logger logger = LoggerFactory.getLogger (InputLayerImpl.class);
-    
-    private int id;
-    
+    private final int id;
     private LayerWithInput outputLayer;
     private final int numberOfUnits;
     private double[] output;
@@ -24,7 +22,12 @@ public class InputLayerImpl implements InputLayer <double[]> {
         this.numberOfUnits = numberOfUnits;
         this.output = new double[numberOfUnits];
     }
-
+    
+    @Override
+    public int getId () {
+        return id;
+    }
+    
     @Override
     public LayerWithInput getOutputLayer () {
         return outputLayer;
@@ -41,22 +44,22 @@ public class InputLayerImpl implements InputLayer <double[]> {
     }
     
     @Override
+    public InputLayerImpl makeCopy (int id) {
+        return (new InputLayerImpl (id, numberOfUnits));
+    }
+    
+    @Override
     public void setInput (double[] input) {
         this.output = input;
     }
 
     @Override
-    public void setInputObject (double[] input) {
-        this.setInput (input);
-    }
-    
-    @Override
     public void setOutputLayer (LayerWithInput layer) {
         this.outputLayer = layer;
     }
-
+    
     @Override
-    public int getId() {
-        return id;
+    public String toString () {
+        return ("InputLayerImpl {id=" + id + "}");
     }
 }

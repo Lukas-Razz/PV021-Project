@@ -5,10 +5,10 @@ package cz.pv021.neuralnets.layers;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-10-30
- * @version 2016-12-13
+ * @version 2016-12-15
  */
-public interface InputLayer <A> extends LayerWithOutput {
-    public void setInput (double[] input);
+public interface InputLayer extends LayerWithOutput {
+    public InputLayer makeCopy (int id);
     
-    public void setInputObject (A input);
+    public void setInput (double[] input);
 }

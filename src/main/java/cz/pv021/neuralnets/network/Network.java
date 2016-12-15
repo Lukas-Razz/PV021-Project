@@ -10,5 +10,7 @@ import cz.pv021.neuralnets.initialization.Initializer;
  * @version 2016-12-13
  */
 public interface Network {
+    public int getNumberOfUnits ();
+    
     public void initializeWeights (Initializer initializer);
 }
