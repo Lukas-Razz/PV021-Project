@@ -3,6 +3,8 @@ package cz.pv021.neuralnets.layers;
 import cz.pv021.neuralnets.functions.ActivationFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -16,8 +18,7 @@ import org.slf4j.LoggerFactory;
 public class FullyConnectedLayer implements HiddenLayer {
     private final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
     
-    private int id;
-    
+    private final int id;
     private final ActivationFunction activationFunction;
     private InputMerger inputMerger;
     private LayerWithInput outputLayer;
@@ -46,6 +47,9 @@ public class FullyConnectedLayer implements HiddenLayer {
 
     @Override
     public void backwardPass () {
+        String logPrefix = "layer # " + id + " / backwardPass: ";
+        System.out.println (logPrefix + "innerPotentials = " + Arrays.toString (innerPotentials));
+        
         // Error with respect to weight.
         double[][] e_wrt_weight = new double[numberOfUnits][inputMerger.getNumberOfUnits()];
         
@@ -67,8 +71,11 @@ public class FullyConnectedLayer implements HiddenLayer {
 
     @Override
     public void forwardPass () {
+        String logPrefix = "layer # " + id + " / forwardPass: ";
         double[] input = inputMerger.getOutput ();
+        System.out.println (logPrefix + "input = " + Arrays.toString (input));
         for (int n = 0; n < numberOfUnits; n++) {
+            // System.out.println (logPrefix + "weights[" + n + "] = " + Arrays.toString (weights[n]));
             innerPotentials[n] = bias[n];
             for (int i = 0; i < weights[n].length; i++) {
                 innerPotentials[n] += input[i] * weights[n][i];
@@ -90,10 +97,30 @@ public class FullyConnectedLayer implements HiddenLayer {
         return biasErrors;
     }
     
+    @Override
+    public List<LayerParameters> getErrors () {
+        List<LayerParameters> errors = new ArrayList<>();
+        for(int i=0; i<weightErrors.size(); i++) {
+            errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
+        }
+        return errors;
+    }
+
     public double[] getErrWrtInnerP () {
         return err_wrt_innerP;
     }
     
+    @Override
+    public int getId () {
+        return id;
+    }
+    
+    @Override
+    public double[] getInnerPotentialGradient () {
+        return err_wrt_innerP;
+    }
+
+    @Override
     public double[] getInnerPotentials () {
         return innerPotentials;
     }
@@ -137,6 +164,9 @@ public class FullyConnectedLayer implements HiddenLayer {
     
     @Override
     public void initializeWeights (long seed) {
+        System.out.println ("Initializing weights for layer #" + id);
+        this.weights = new double[numberOfUnits][inputMerger.getNumberOfUnits ()];
+        
         Random r = new Random (seed);
         for (int i = 0; i < weights.length; i++) {
             for (int j = 0; j < weights[i].length; j++) {
@@ -156,27 +186,12 @@ public class FullyConnectedLayer implements HiddenLayer {
     @Override
     public void setInputLayers (List <LayerWithOutput> layers) {
         this.inputMerger = new InputMerger (layers);
-        this.weights = new double[numberOfUnits][inputMerger.getNumberOfUnits ()];
     }
 
     @Override
     public void setParameters (LayerParameters parameters) {
-        weights = parameters.getWeights();
-        bias = parameters.getBias();
-    }
-
-    @Override
-    public double[] getInnerPotentialGradient () {
-        return err_wrt_innerP;
-    }
-
-    @Override
-    public List<LayerParameters> getErrors () {
-        List<LayerParameters> errors = new ArrayList<>();
-        for(int i=0; i<weightErrors.size(); i++) {
-            errors.add(new LayerParameters(weightErrors.get(i), biasErrors.get(i)));
-        }
-        return errors;
+        bias = parameters.getBias ();
+        weights = parameters.getWeights ();
     }
 
     @Override
@@ -214,7 +229,17 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     @Override
-    public int getId() {
-        return id;
+    public String toString () {
+        List <Integer> inputLayerIds = new ArrayList <> ();
+        for (LayerWithOutput inputLayer : this.getInputLayers ()) {
+            inputLayerIds.add (inputLayer.getId ());
+        }
+        return (
+            "FullyConnectedLayer {"
+                + "id=" + id
+                + ", inputLayers=" + inputLayerIds
+                + ", outputLayer=" + outputLayer.getId ()
+            + "}"
+        );
     }
 }

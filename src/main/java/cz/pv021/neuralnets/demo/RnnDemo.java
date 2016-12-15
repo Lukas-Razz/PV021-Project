@@ -43,18 +43,19 @@ public class RnnDemo {
         Cost cost = new Cost (new SquaredError(), l1, l2);
         Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
         
-        ByteInputLayer layer0 = new ByteInputLayer (0);
-        HiddenLayer    layer1 = new FullyConnectedRecursiveLayer (1, 5, new HyperbolicTangent());
-        OutputLayer    layer2 = new OutputLayerImpl (2, 4, new Softmax ());
+        // InputLayer                   layer0 = new InputLayerImpl (0, 4);
+        InputLayer                   layer0 = new ByteInputLayer (0);
+        FullyConnectedRecursiveLayer layer1 = new FullyConnectedRecursiveLayer (1, 3, new HyperbolicTangent());
+        OutputLayer                  layer2 = new OutputLayerImpl (2, 4, new Softmax ());
         
-        RecurrentNetwork <Byte, OutputLayer> network = new RecurrentNetwork <> (
-            Arrays.asList (layer0),
-            Arrays.asList (layer1),
+        RecurrentNetwork <InputLayer, OutputLayer> rnn = new RecurrentNetwork <> (
+            layer0,
+            layer1,
             layer2,
             cost,
             optimizer
         );
-        network.initializeWeights (100);
+        rnn.initializeWeights (100);
         
         String csDataPath = "./data/language_identification/cs_sentences.txt";
         Path csDataFilePath = FileSystems.getDefault().getPath (csDataPath);
@@ -62,7 +63,7 @@ public class RnnDemo {
         List <String> csSentences = Files.readAllLines (csDataFilePath, StandardCharsets.UTF_8);
         LOGGER.info ("Train set size: " + csSentences.size ());
 
-        int classes = 2;
+        int classes = 5;
         int[][] confusionMatrix = new int[classes][classes];
         for (int row = 0; row < classes; row++) {
             for (int col = 0; col < classes; col++) {
@@ -71,24 +72,30 @@ public class RnnDemo {
         }
         
         int i = 1;
-        for (String csSentence : csSentences.subList (0, 10)) {
+        for (String csSentence : csSentences.subList (0, 2)) {
             byte[] bytes = csSentence.getBytes (StandardCharsets.UTF_8);
             List <double[]> attributeSequence = new LinkedList <> ();
             for (byte byte8 : bytes) {
+                double[] x = new double [4];
+                x[0]=0.111;
+                x[1]=0.222;
+                x[2]=0.333;
+                x[3]=0.444;
+                //attributeSequence.add (x);
                 attributeSequence.add (ByteUtils.byteToOneHotVector (byte8));
             }
             
-            int classNumber = 0;
-            network.backpropagationThroughTime (attributeSequence, classNumber);
-            int predictedClassNumber = network.getOutputClassIndex ();
+            int classNumber = 2;
+            rnn.backpropagationThroughTime (attributeSequence, classNumber);
+            int predictedClassNumber = rnn.getOutputClassIndex ();
             confusionMatrix[classNumber][predictedClassNumber]++;
             
             System.out.println ();
             System.out.println ("=== Example #" + i + " ===");
-            List <HiddenLayer> hiddenLayers = network.getHiddenLayers ();
+            List <HiddenLayer> hiddenLayers = rnn.getHiddenLayers ();
             System.out.println ("innerPotentials = " + Arrays.toString (hiddenLayers.get(0).getInnerPotentials()));
             System.out.println (
-                "output = " + Arrays.toString (network.getOutput ())
+                "output = " + Arrays.toString (rnn.getOutput ())
                 // + ", predictedClass = " + predictedClassNumber
                 // + ", expectedClass = " + classNumber
             );

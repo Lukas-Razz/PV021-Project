@@ -49,12 +49,12 @@ public class MLP {
         Cost cost = new Cost (new SquaredError(), l1, l2);
         Optimizer optimizer = new Optimizer(learningRate, new SGD(), l1, l2);
         
-        InputLayer <double[]> layer0  = new InputLayerImpl (0, 4);
-        HiddenLayer           layer1a = new FullyConnectedLayer (1, 10, new HyperbolicTangent());
-        HiddenLayer           layer1b = new FullyConnectedLayer (2, 10, new HyperbolicTangent());
-        OutputLayer           layer2  = new OutputLayerImpl (3, 3, new Softmax ());
+        InputLayer  layer0  = new InputLayerImpl (0, 4);
+        HiddenLayer layer1a = new FullyConnectedLayer (1, 10, new HyperbolicTangent());
+        HiddenLayer layer1b = new FullyConnectedLayer (2, 10, new HyperbolicTangent());
+        OutputLayer layer2  = new OutputLayerImpl (3, 3, new Softmax ());
         
-        MultilayerPerceptron <double[], OutputLayer> irisPerceptron = new MultilayerPerceptron <> (
+        MultilayerPerceptron <InputLayer, OutputLayer> irisPerceptron = new MultilayerPerceptron <> (
             Arrays.asList (layer0),
             Arrays.asList (layer1a),
             layer2,

@@ -1,12 +1,13 @@
 package cz.pv021.neuralnets.layers;
 
 import cz.pv021.neuralnets.utils.Pair;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author  Josef Plch
  * @since   2016-12-13
- * @version 2016-12-13
+ * @version 2016-12-15
  */
 public class InputMerger {
     private final List <LayerWithOutput> layers;
@@ -44,9 +45,12 @@ public class InputMerger {
             return new Pair <> (layerIndex, neuronIndex);
         }
     }
-
+    
+    /**
+     * @return Read-only list of layers.
+     */
     public List <LayerWithOutput> getLayers () {
-        return layers;
+        return Collections.unmodifiableList (layers);
     }
 
     public int getNumberOfUnits () {

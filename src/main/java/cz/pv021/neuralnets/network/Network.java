@@ -9,4 +9,6 @@ package cz.pv021.neuralnets.network;
  */
 public interface Network {
     public void initializeWeights (long seed);
+    
+    public int getNumberOfUnits ();
 }

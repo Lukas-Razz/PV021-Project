@@ -14,22 +14,22 @@ import cz.pv021.neuralnets.utils.OutputExample;
 import java.util.ArrayList;
 
 /**
- * @param <I> Type of input objects.
+ * @param <IL> Type of the input layers.
  * @param <OL> Type of the output layer.
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-17
- * @version 2016-12-14
+ * @version 2016-12-15
  */
-public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network {
-    private final List <InputLayer <I>> inputLayers;
+public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer> implements Network {
+    private final List <IL> inputLayers = new ArrayList <> ();
     private final List <HiddenLayer> hiddenLayers = new ArrayList <> ();
     private final OL outputLayer;
     private final Cost cost;
     private final Optimizer optimizer;
     
-    public MultilayerPerceptron (List <InputLayer <I>> inputLayers, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
-        this.inputLayers = inputLayers;
+    public MultilayerPerceptron (List <IL> inputLayers, List <HiddenLayer> hiddenLayers, OL outputLayer, Cost cost, Optimizer optimizer) {
+        this.inputLayers.addAll (inputLayers);
         this.hiddenLayers.addAll (hiddenLayers);
         this.outputLayer = outputLayer;
         this.cost = cost;
@@ -93,8 +93,21 @@ public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network
         return hiddenLayers;
     }
     
-    public List <InputLayer <I>> getInputLayers () {
+    public List <IL> getInputLayers () {
         return inputLayers;
+    }
+    
+    @Override
+    public int getNumberOfUnits () {
+        int sum = 0;
+        for (IL inputLayer : inputLayers) {
+            sum += inputLayer.getNumberOfUnits ();
+        }
+        for (HiddenLayer hiddenLayer : hiddenLayers) {
+            sum += hiddenLayer.getNumberOfUnits ();
+        }
+        sum += outputLayer.getNumberOfUnits ();
+        return sum;
     }
     
     // Delegate method.
@@ -140,10 +153,14 @@ public class MultilayerPerceptron <I, OL extends OutputLayer> implements Network
         }
     }
     
-    // Delegate method.
-    public void setInputObjects (List <I> inputs) {
-        for (int i = 0; i < inputs.size (); i++) {
-            inputLayers.get (i).setInputObject (inputs.get (i));
-        }
+    @Override
+    public String toString () {
+        return (
+            "MultilayerPerceptron (" + this.getNumberOfUnits() + " neurons) {"
+                + "\n    inputLayers=" + inputLayers
+                + ",\n    hiddenLayers=" + hiddenLayers
+                + ",\n    outputLayer=" + outputLayer
+            + "\n}"
+        );
     }
 }
