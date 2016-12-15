@@ -3,7 +3,6 @@ package cz.pv021.neuralnets.layers;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -13,7 +12,7 @@ import cz.pv021.neuralnets.functions.HiddenFunction;
 /**
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-14
+ * @version 2016-12-15
  */
 public class FullyConnectedLayer implements HiddenLayer {
     private final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
@@ -114,9 +113,10 @@ public class FullyConnectedLayer implements HiddenLayer {
         return id;
     }
     
+    // Alias.
     @Override
     public double[] getInnerPotentialGradient () {
-        return err_wrt_innerP;
+        return this.getErrWrtInnerP ();
     }
 
     @Override
@@ -129,9 +129,16 @@ public class FullyConnectedLayer implements HiddenLayer {
         return inputMerger.getLayers ();
     }
     
+    @Override
+    public int getInputSize () {
+        return inputMerger.getNumberOfUnits ();
+    }
+    
+    /*
     public InputMerger getInputMerger () {
         return inputMerger;
     }
+    */
     
     @Override
     public int getNumberOfUnits () {
@@ -157,6 +164,7 @@ public class FullyConnectedLayer implements HiddenLayer {
         return weightErrors;
     }
     
+    @Override
     public double[][] getWeights () {
         return weights;
     }
@@ -165,7 +173,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     @Override
     public void initializeWeights (long seed) {
         System.out.println ("Initializing weights for layer #" + id);
-        this.weights = new double[numberOfUnits][inputMerger.getNumberOfUnits ()];
+        this.resetWeights ();
         
         Random r = new Random (seed);
         for (int i = 0; i < weights.length; i++) {
@@ -184,25 +192,11 @@ public class FullyConnectedLayer implements HiddenLayer {
         weightErrors.clear ();
     }
     
-    @Override
-    public void setOutputLayer (LayerWithInput outputLayer) {
-        this.outputLayer = outputLayer;
+    public void resetWeights () {
+        System.out.println ("RESETING WEIGHTS: " + inputMerger.getLayers().size() + " input layers, " + inputMerger.getNumberOfUnits () + " input neurons in total");
+        this.weights = new double[numberOfUnits][inputMerger.getNumberOfUnits ()];
     }
     
-    @Override
-    public void setInputLayers (List <LayerWithOutput> layers) {
-        this.inputMerger = new InputMerger (layers);
-        if (this.weights == null) {
-            this.weights = new double[numberOfUnits][inputMerger.getNumberOfUnits ()];
-        }
-    }
-
-    @Override
-    public void setParameters (LayerParameters parameters) {
-        bias = parameters.getBias ();
-        weights = parameters.getWeights ();
-    }
-
     public void setBias (double[] bias) {
         this.bias = bias;
     }
@@ -215,12 +209,33 @@ public class FullyConnectedLayer implements HiddenLayer {
         this.err_wrt_innerP = errWrtInnerP;
     }
     
+    // Alias.
+    public void setInnerPotentialGradient (double[] innerPotentialGradient) {
+        this.setErrWrtInnerP (innerPotentialGradient);
+    }
+    
     public void setInnerPotentials (double[] innerPotentials) {
         this.innerPotentials = innerPotentials;
     }
     
+    @Override
+    public void setInputLayers (List <LayerWithOutput> layers) {
+        this.inputMerger = new InputMerger (layers);
+    }
+
     public void setOutput (double[] output) {
         this.output = output;
+    }
+    
+    @Override
+    public void setOutputLayer (LayerWithInput outputLayer) {
+        this.outputLayer = outputLayer;
+    }
+    
+    @Override
+    public void setParameters (LayerParameters parameters) {
+        this.bias = parameters.getBias ();
+        this.weights = parameters.getWeights ();
     }
     
     public void setWeightErrors (List <double[][]> weightErrors) {

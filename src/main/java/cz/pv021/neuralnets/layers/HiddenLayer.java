@@ -12,6 +12,4 @@ import cz.pv021.neuralnets.functions.HiddenFunction;
  */
 public interface HiddenLayer extends LayerWithInput, LayerWithOutput {
     public HiddenFunction getActivationFunction ();
-    
-    public double[] getInnerPotentials ();
 }

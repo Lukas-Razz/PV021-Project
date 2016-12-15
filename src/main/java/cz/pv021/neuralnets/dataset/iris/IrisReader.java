@@ -1,9 +1,6 @@
 package cz.pv021.neuralnets.dataset.iris;
 
 import cz.pv021.neuralnets.dataset.DataReader;
-import cz.pv021.neuralnets.dataset.Example;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +9,14 @@ import java.util.List;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-12-03
- * @version 2016-12-10
+ * @version 2016-12-15
  */
-public class IrisReader implements DataReader {
+public class IrisReader implements DataReader <IrisExample> {
     private int attributesNo = 0;
     
     @Override
-    public List <Example> readDataSet (List <String> lines) {
-        List <Example> dataSet = new ArrayList <> ();
+    public List <IrisExample> readDataSet (List <String> lines) {
+        List <IrisExample> dataSet = new ArrayList <> ();
         for (String line : lines) {
             IrisExample example = this.readExample (line);
             dataSet.add (example);

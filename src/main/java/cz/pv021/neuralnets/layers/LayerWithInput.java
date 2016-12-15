@@ -9,7 +9,7 @@ import java.util.List;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-08
- * @version 2016-12-14
+ * @version 2016-12-15
  */
 public interface LayerWithInput extends Layer {
     /**
@@ -24,11 +24,22 @@ public interface LayerWithInput extends Layer {
     
     public List <LayerParameters> getErrors ();
     
+    public double[] getInnerPotentials ();    
+    
     public double[] getInnerPotentialGradient ();
+    
+    public List <LayerWithOutput> getInputLayers ();
     
     public LayerParameters getParameters ();
     
-    public List <LayerWithOutput> getInputLayers ();
+    public double[][] getWeights ();
+    
+    /**
+     * Get the total number of neurons in the input layers.
+     * 
+     * @return Input size.
+     */
+    public int getInputSize ();
     
     public void initializeWeights (long seed);
     

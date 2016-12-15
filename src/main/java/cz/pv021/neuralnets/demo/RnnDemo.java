@@ -1,5 +1,7 @@
 package cz.pv021.neuralnets.demo;
 
+import cz.pv021.neuralnets.dataset.udcorpora.UdExample;
+import cz.pv021.neuralnets.dataset.udcorpora.UdLanguage;
 import cz.pv021.neuralnets.optimizers.SGD;
 import cz.pv021.neuralnets.error.*;
 import cz.pv021.neuralnets.layers.*;
@@ -49,9 +51,8 @@ public class RnnDemo {
         Initializer initializer = new Initializer (new NormalInitialization (123456));
         
         InputLayer                   layer0 = new InputLayerImpl (0, 4);
-        // InputLayer                   layer0 = new ByteInputLayer (0);
         FullyConnectedRecursiveLayer layer1 = new FullyConnectedRecursiveLayer (1, 3, new HyperbolicTangent());
-        OutputLayer                  layer2 = new OutputLayerImpl (2, 4, new Softmax ());
+        OutputLayer                  layer2 = new OutputLayerImpl (2, UdLanguage.size (), new Softmax ());
         
         RecurrentNetwork <InputLayer, OutputLayer> rnn = new RecurrentNetwork <> (
             layer0,
@@ -81,29 +82,56 @@ public class RnnDemo {
             byte[] bytes = csSentence.getBytes (StandardCharsets.UTF_8);
             List <double[]> attributeSequence = new LinkedList <> ();
             for (byte byte8 : bytes) {
-                double[] x = new double [4];
-                x[0]=0.111;
-                x[1]=0.222;
-                x[2]=0.333;
-                x[3]=0.444;
-                attributeSequence.add (x);
-                // attributeSequence.add (ByteUtils.byteToOneHotVector (byte8));
+                attributeSequence.add (ByteUtils.byteToOneHotVector (byte8));
+            }
+            attributeSequence = new LinkedList <> ();
+            
+            double[] e1 = new double [4];
+            e1[0]=0.111;
+            e1[1]=0.222;
+            e1[2]=0.333;
+            e1[3]=0.444;
+            
+            double[] e2 = new double [4];
+            e2[0]=0.555;
+            e2[1]=0.666;
+            e2[2]=0.777;
+            e2[3]=0.888;
+            
+            for (int i2 = 0; i2 < 10; i2++) {
+                if (i2 % 2 == 0) {
+                    attributeSequence.add (e1);
+                }
+                else {
+                    attributeSequence.add (e2);
+                }
             }
             
-            int classNumber = 2;
-            rnn.backpropagationThroughTime (attributeSequence, classNumber);
+            UdExample example = new UdExample (attributeSequence, UdLanguage.FRENCH);
+            /*
+            for (UdLanguage language : UdLanguage.values()) {
+                System.out.println ("Language #" + language.getIndex () + ": " + language.getName ());
+            }
+            */
+            rnn.backpropagationThroughTime (
+                example.getAttributes (),
+                example.getExampleClass().getIndex ()
+            );
+            
+            int classNumber = example.getExampleClass ().getIndex ();
             int predictedClassNumber = rnn.getOutputClassIndex ();
             confusionMatrix[classNumber][predictedClassNumber]++;
             
             System.out.println ();
             System.out.println ("=== Example #" + i + " ===");
             List <HiddenLayer> hiddenLayers = rnn.getHiddenLayers ();
-            System.out.println ("innerPotentials = " + Arrays.toString (hiddenLayers.get(0).getInnerPotentials()));
-            System.out.println (
-                "output = " + Arrays.toString (rnn.getOutput ())
-                // + ", predictedClass = " + predictedClassNumber
-                // + ", expectedClass = " + classNumber
-            );
+            System.out.println ("HL innerPotentials = " + Arrays.toString (hiddenLayers.get(0).getInnerPotentials()));
+            System.out.println ("HL gradient = " + Arrays.toString (hiddenLayers.get(0).getInnerPotentialGradient()));
+            System.out.println ("OL innerPotentials = " + Arrays.toString (rnn.getOutputLayer ().getInnerPotentials()));
+            System.out.println ("OL gradient = " + Arrays.toString (rnn.getOutputLayer ().getInnerPotentialGradient()));
+            System.out.println ("OL output = " + Arrays.toString (rnn.getOutput ()));
+            System.out.println ("predictedClass = " + predictedClassNumber);
+            System.out.println ("expectedClass = " + classNumber);
             
             i++;
         }

@@ -3,7 +3,6 @@ package cz.pv021.neuralnets.layers;
 import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.OutputFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
-import cz.pv021.neuralnets.utils.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-14
+ * @version 2016-12-15
  */
 public class OutputLayerImpl implements OutputLayer {
     final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
@@ -95,6 +94,11 @@ public class OutputLayerImpl implements OutputLayer {
     }
     
     @Override
+    public double[] getInnerPotentials () {
+        return innerPotentials;
+    }
+    
+    @Override
     public double[] getInnerPotentialGradient () {
         return err_wrt_innerP;
     }
@@ -102,6 +106,11 @@ public class OutputLayerImpl implements OutputLayer {
     @Override
     public List <LayerWithOutput> getInputLayers () {
         return inputLayers.getLayers ();
+    }
+    
+    @Override
+    public int getInputSize () {
+        return inputLayers.getNumberOfUnits ();
     }
     
     @Override
@@ -117,6 +126,11 @@ public class OutputLayerImpl implements OutputLayer {
     @Override
     public LayerParameters getParameters () {
         return new LayerParameters(weights, bias, id);
+    }
+    
+    @Override
+    public double[][] getWeights () {
+        return weights;
     }
     
     @Override

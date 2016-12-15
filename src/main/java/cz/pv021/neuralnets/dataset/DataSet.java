@@ -6,21 +6,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @param <C> Type of data class.
+ * @param <E> Type of examples.
+ * 
  * @author  Lukáš Daubner
  * @since   2016-12-10
  * @version 2016-12-10
  */
-public class DataSet {
-    List<Example> trainSet;
-    List<Example> testSet;
+public class DataSet <C extends DataClass, E extends SimpleExample <C>> {
+    List <E> trainSet;
+    List <E> testSet;
     
     int numberOfAttributes;
     
-    public DataSet(List<Example> examples, double splitFactor) {
+    public DataSet (List <E> examples, double splitFactor) {
         trainSet = new ArrayList<>();
         testSet = new ArrayList<>();
         
-        int testSetSamples = (int)Math.floor(examples.size() * splitFactor);
+        int testSetSamples = (int) Math.floor(examples.size() * splitFactor);
         for(int i=0; i<testSetSamples; i++) {
             testSet.add(examples.get(i));
         }
@@ -31,18 +34,18 @@ public class DataSet {
         numberOfAttributes = examples.get(0).getAttributes().length;
     }
     
-    public DataSet(List<Example> trainSet, List<Example> testSet) {
+    public DataSet (List <E> trainSet, List <E> testSet) {
         this.trainSet = trainSet;
         this.testSet = testSet;
         
         numberOfAttributes = trainSet.get(0).getAttributes().length;
     }
 
-    public List<Example> getTestSet() {
+    public List <E> getTestSet() {
         return testSet;
     }
 
-    public List<Example> getTrainSet() {
+    public List <E> getTrainSet() {
         return trainSet;
     }
     
@@ -97,26 +100,30 @@ public class DataSet {
         }
     }
     
-    private Example getExampleByIndex(int i) {
-        if(i<trainSet.size())
+    private E getExampleByIndex (int i) {
+        if (i < trainSet.size()) {
             return trainSet.get(i);
-        else 
+        }
+        else {
             return testSet.get(i - trainSet.size());
+        }
     }
     
-    public List<List<Example>> splitToBatch(int batchSize) {
-        List<List<Example>> batches = new ArrayList<>();
+    public List <List <E>> splitToBatch (int batchSize) {
+        List <List <E>> batches = new ArrayList<>();
         
-        int totalBatches = (int)Math.ceil(trainSet.size() / (double)batchSize);
+        int totalBatches = (int) Math.ceil(trainSet.size() / (double)batchSize);
         int index = 0;
         for(int i=0; i<totalBatches; i++) {
-            List<Example> batch = new ArrayList<>();
+            List<E> batch = new ArrayList<>();
             for(int j=0; j<batchSize; j++) {
                 if(index < trainSet.size()) {
                     batch.add(trainSet.get(index));
                     index ++;
                 }
-                else break;
+                else {
+                    break;
+                }
             }
             batches.add(batch);
         }

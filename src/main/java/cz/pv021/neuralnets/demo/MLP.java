@@ -4,6 +4,7 @@ import cz.pv021.neuralnets.dataset.DataSet;
 import cz.pv021.neuralnets.dataset.Example;
 import cz.pv021.neuralnets.dataset.iris.IrisReader;
 import cz.pv021.neuralnets.dataset.iris.IrisClass;
+import cz.pv021.neuralnets.dataset.iris.IrisExample;
 import cz.pv021.neuralnets.optimizers.*;
 import cz.pv021.neuralnets.error.*;
 import cz.pv021.neuralnets.initialization.*;
@@ -53,7 +54,7 @@ public class MLP {
         InputLayer  layer0  = new InputLayerImpl (0, 4);
         HiddenLayer layer1a = new FullyConnectedLayer (1, 10, new HyperbolicTangent());
         HiddenLayer layer1b = new FullyConnectedLayer (2, 10, new HyperbolicTangent());
-        OutputLayer layer2  = new OutputLayerImpl (3, 3, new Softmax ());
+        OutputLayer layer2  = new OutputLayerImpl (3, IrisClass.size (), new Softmax ());
         
         Initializer initializer = new Initializer (new NormalInitialization (123456));
         
@@ -80,12 +81,12 @@ public class MLP {
         
         IrisReader irisReader = new IrisReader ();
         // Backup version: IrisData.getData ()
-        DataSet dataSet = new DataSet(irisReader.readDataSet (trainData), irisReader.readDataSet (testData));
+        DataSet <IrisClass, IrisExample> dataSet = new DataSet <> (irisReader.readDataSet (trainData), irisReader.readDataSet (testData));
         dataSet.normalizeToMinusOnePlusOne();
         
         // TODO: Loss má teď zadrátováno že je jen pro klasifikaci, to se může zobecnit
         final int bachSize = 1;
-        List<List<Example>> batches = dataSet.splitToBatch(bachSize);
+        List<List<IrisExample>> batches = dataSet.splitToBatch(bachSize);
         for (int epoch = 0; epoch < 6; epoch++) {
             runIrisEpoch (irisPerceptron, batches, epoch);
         }
@@ -93,7 +94,7 @@ public class MLP {
         testIris (irisPerceptron, dataSet.getTestSet ());
     }
     
-    private static void runIrisEpoch (MultilayerPerceptron <?, ?> irisPerceptron, List<List<Example>> batches, int epoch) {
+    private static void runIrisEpoch (MultilayerPerceptron <?, ?> irisPerceptron, List<List<IrisExample>> batches, int epoch) {
         // Set up the confusion matrix.
         int classes = IrisClass.values().length;
         int[][] confusionMatrix = new int[classes][classes];
@@ -104,9 +105,9 @@ public class MLP {
         }
 
         double error = 0;
-        for(List<Example> batch : batches) {
+        for(List<IrisExample> batch : batches) {
             List<OutputExample> batchOutput = new ArrayList<>();
-            for (Example example : batch) {
+            for (IrisExample example : batch) {
                 double[] attributes = example.getAttributes ();
                 int correctClassNumber = example.getExampleClass ().getIndex ();
 
@@ -137,7 +138,7 @@ public class MLP {
         System.out.println ("Epoch #" + epoch + ": average error = " + error);
     }
     
-    private static void testIris (MultilayerPerceptron <?, ?> irisPerceptron, List<Example> testSet) {
+    private static void testIris (MultilayerPerceptron <?, ?> irisPerceptron, List<IrisExample> testSet) {
         // Set up the confusion matrix.
         int classes = IrisClass.values().length;
         int[][] confusionMatrix = new int[classes][classes];
@@ -147,7 +148,7 @@ public class MLP {
             }
         }
          
-        for (Example example : testSet) {
+        for (IrisExample example : testSet) {
             double[] attributes = example.getAttributes ();
             int correctClassNumber = example.getExampleClass ().getIndex ();
 

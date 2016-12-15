@@ -62,7 +62,7 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
         }
     }
     
-    protected void connectLayers () {
+    public final void connectLayers () {
         List <LayerWithOutput> ils = new ArrayList <> (inputLayers);
         
         if (hiddenLayers.isEmpty ()) {

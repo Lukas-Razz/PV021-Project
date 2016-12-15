@@ -14,13 +14,9 @@ import cz.pv021.neuralnets.functions.HiddenFunction;
  */
 public class FullyConnectedRecursiveLayer extends FullyConnectedLayer implements RecurrentHiddenLayer {
     private final Logger logger = LoggerFactory.getLogger (FullyConnectedRecursiveLayer.class);
-    private double[][] loopWeights;
-    private final int layerSize;
 
     public FullyConnectedRecursiveLayer (int id, int numberOfUnits, HiddenFunction activationFunction) {
         super (id, numberOfUnits, activationFunction);
-        this.loopWeights = new double[numberOfUnits][numberOfUnits];
-        this.layerSize = numberOfUnits;
     }
     
     @Override

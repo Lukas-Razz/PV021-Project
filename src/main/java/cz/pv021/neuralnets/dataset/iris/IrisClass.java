@@ -38,4 +38,8 @@ public enum IrisClass implements DataClass {
         }
         throw new IllegalArgumentException ("Invalid class code.");
     }
+    
+    public static int size () {
+        return values().length;
+    }
 }

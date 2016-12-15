@@ -8,10 +8,12 @@ import cz.pv021.neuralnets.functions.OutputFunction;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-08
- * @version 2016-12-13
+ * @version 2016-12-15
  */
 
 public interface OutputLayer extends LayerWithInput {
+    public OutputFunction getActivationFunction ();
+    
     /**
      * Default implementation.
      * 
@@ -36,6 +38,4 @@ public interface OutputLayer extends LayerWithInput {
     public void setExpectedOutput (double expectedOutput);
     
     public void setLoss (Loss loss);
-    
-    public OutputFunction getActivationFunction();
 }
