@@ -63,7 +63,7 @@ public class OutputLayerImpl implements OutputLayer {
                 err_wrt_weight[i][j] = err_wrt_innerP[i] * inputMerger.getOutput()[j]; // innerPotential of neuron "i" * output of neuron "j"
             }
         }
-        System.out.println (logPrefix + "gradient = " + Arrays.toString (this.getInnerPotentialGradient ()));
+        // System.out.println (logPrefix + "gradient = " + Arrays.toString (this.getInnerPotentialGradient ()));
         biasErrors.add(err_wrt_innerP); // err_wrt_innerP = err_wrt_bias
         weightErrors.add(err_wrt_weight);
     }
@@ -73,7 +73,7 @@ public class OutputLayerImpl implements OutputLayer {
     public void forwardPass () {
         String logPrefix = "OL #" + id + " / forwardPass: ";
         double[] input = inputMerger.getOutput ();
-        System.out.println (logPrefix + "input = " + Arrays.toString (input));
+        // System.out.println (logPrefix + "input = " + Arrays.toString (input));
         
         for (int n = 0; n < numberOfUnits; n++) {
             innerPotentials[n] = bias[n];

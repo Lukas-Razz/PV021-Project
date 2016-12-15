@@ -44,6 +44,7 @@ public class RnnDemo {
         double momentum = 0.0;
         double l1 = 0.00;
         double l2 = 0.0001;
+        int classes = UdLanguage.size ();
         
         Cost cost = new Cost (new MeanSquaredError(), l1, l2);
         Optimizer optimizer = new Optimizer(learningRate, new SGD(), momentum, l1, l2);
@@ -52,7 +53,7 @@ public class RnnDemo {
         
         InputLayer                   layer0 = new InputLayerImpl (0, 256);
         FullyConnectedRecursiveLayer layer1 = new FullyConnectedRecursiveLayer (1, 3, new HyperbolicTangent());
-        OutputLayer                  layer2 = new OutputLayerImpl (2, UdLanguage.size (), new Softmax ());
+        OutputLayer                  layer2 = new OutputLayerImpl (2, classes, new Softmax ());
         
         RecurrentNetwork <InputLayer, OutputLayer> rnn = new RecurrentNetwork <> (
             layer0,
@@ -65,11 +66,9 @@ public class RnnDemo {
         
         String csDataPath = "./data/language_identification/cs_sentences.txt";
         Path csDataFilePath = FileSystems.getDefault().getPath (csDataPath);
-        LOGGER.info ("irisTrainFilePath: " + csDataFilePath.toAbsolutePath ());
         List <String> csSentences = Files.readAllLines (csDataFilePath, StandardCharsets.UTF_8);
         LOGGER.info ("Train set size: " + csSentences.size ());
 
-        int classes = 5;
         int[][] confusionMatrix = new int[classes][classes];
         for (int row = 0; row < classes; row++) {
             for (int col = 0; col < classes; col++) {
@@ -78,7 +77,11 @@ public class RnnDemo {
         }
         
         int i = 1;
-        for (String csSentence : csSentences.subList (0, 2)) {
+        for (String csSentence : csSentences.subList (0, 10)) {
+            System.out.println ();
+            System.out.println ("=== Sentence #" + i + " ===");
+            System.out.println ("Sentence: " + csSentence);
+            
             byte[] bytes = csSentence.getBytes (StandardCharsets.UTF_8);
             List <double[]> attributeSequence = new LinkedList <> ();
             for (byte byte8 : bytes) {
@@ -122,10 +125,9 @@ public class RnnDemo {
             
             int classNumber = example.getExampleClass ().getIndex ();
             int predictedClassNumber = rnn.getOutputClassIndex ();
+            
             confusionMatrix[classNumber][predictedClassNumber]++;
             
-            System.out.println ();
-            System.out.println ("=== Example #" + i + " ===");
             List <HiddenLayer> hiddenLayers = rnn.getHiddenLayers ();
             System.out.println ("HL innerPotentials = " + Arrays.toString (hiddenLayers.get(0).getInnerPotentials()));
             System.out.println ("HL gradient = " + Arrays.toString (hiddenLayers.get(0).getInnerPotentialGradient()));
