@@ -4,6 +4,7 @@ import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.OutputFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ public class OutputLayerImpl implements OutputLayer {
     private final int id;
     private Loss loss;
     private final OutputFunction outputFunction;
-    private InputMerger inputLayers;
+    private InputMerger inputMerger;
     private double[] bias;
     private final List<double[]> biasErrors;
     // Error with respect to inner potentials = inner potential gradient.
@@ -50,17 +51,19 @@ public class OutputLayerImpl implements OutputLayer {
     
     @Override
     public void backwardPass () {
-        double[][] err_wrt_weight = new double[numberOfUnits][inputLayers.getNumberOfUnits()];
+        String logPrefix = "OL #" + id + " / backwardPass";
+        double[][] err_wrt_weight = new double[numberOfUnits][inputMerger.getNumberOfUnits()];
         double[] preSoftmax = outputFunction.derivative(innerPotentials);
         
-        for(int i=0; i<numberOfUnits; i++) {
+        for (int i = 0; i < numberOfUnits; i++) {
             double error = i == expectedOutput ? loss.derivative(output[i], 1) : loss.derivative(output[i], 0); //pro klasifikaci
             err_wrt_innerP[i] = error * preSoftmax[i];
             
-            for(int j=0; j<inputLayers.getNumberOfUnits(); j++) {
-                err_wrt_weight[i][j] = err_wrt_innerP[i] * inputLayers.getOutput()[j]; // innerPotential of neuron "i" * output of neuron "j"
+            for (int j=0; j<inputMerger.getNumberOfUnits(); j++) {
+                err_wrt_weight[i][j] = err_wrt_innerP[i] * inputMerger.getOutput()[j]; // innerPotential of neuron "i" * output of neuron "j"
             }
         }
+        System.out.println (logPrefix + "gradient = " + Arrays.toString (this.getInnerPotentialGradient ()));
         biasErrors.add(err_wrt_innerP); // err_wrt_innerP = err_wrt_bias
         weightErrors.add(err_wrt_weight);
     }
@@ -68,7 +71,9 @@ public class OutputLayerImpl implements OutputLayer {
     @Override
     // Inner potential is remembered for backward pass.
     public void forwardPass () {
-        double[] input = inputLayers.getOutput ();
+        String logPrefix = "OL #" + id + " / forwardPass: ";
+        double[] input = inputMerger.getOutput ();
+        System.out.println (logPrefix + "input = " + Arrays.toString (input));
         
         for (int n = 0; n < numberOfUnits; n++) {
             innerPotentials[n] = bias[n];
@@ -105,12 +110,12 @@ public class OutputLayerImpl implements OutputLayer {
 
     @Override
     public List <LayerWithOutput> getInputLayers () {
-        return inputLayers.getLayers ();
+        return inputMerger.getLayers ();
     }
     
     @Override
     public int getInputSize () {
-        return inputLayers.getNumberOfUnits ();
+        return inputMerger.getNumberOfUnits ();
     }
     
     @Override
@@ -151,7 +156,12 @@ public class OutputLayerImpl implements OutputLayer {
         biasErrors.clear();
         weightErrors.clear();
     }
-
+    
+    @Override
+    public void resetWeights () {
+        this.weights = new double[numberOfUnits][inputMerger.getNumberOfUnits ()];
+    }
+    
     @Override
     public void setExpectedOutput (double expectedOutput) {
         this.expectedOutput = expectedOutput;
@@ -159,8 +169,7 @@ public class OutputLayerImpl implements OutputLayer {
 
     @Override
     public void setInputLayers (List <LayerWithOutput> layers) {
-        this.inputLayers = new InputMerger (layers);
-        this.weights = new double[numberOfUnits][inputLayers.getNumberOfUnits ()];
+        this.inputMerger = new InputMerger (layers);
     }
 
     @Override

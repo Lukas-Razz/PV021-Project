@@ -87,7 +87,7 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
                 inputLayer.setInput (inputSequence.get (t + i));
                 hiddenLayers.get(i).forwardPass ();
             }
-            this.getOutputLayer().backwardPass ();
+            this.getOutputLayer().forwardPass ();
             
             // p = forward-propagate the inputs over the whole unfolded network
             // error = target - prediction

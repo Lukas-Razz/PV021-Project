@@ -138,8 +138,10 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
     @Override
     public void initializeWeights (Initializer initializer) {
         hiddenLayers.forEach (hiddenLayer -> {
+            hiddenLayer.resetWeights ();
             initializer.initialize (hiddenLayer.getParameters (), hiddenLayer.getActivationFunction ());
         });
+        outputLayer.resetWeights ();
         initializer.initialize(outputLayer.getParameters(), outputLayer.getActivationFunction());
     }
     

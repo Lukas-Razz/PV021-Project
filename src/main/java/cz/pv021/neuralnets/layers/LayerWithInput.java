@@ -45,6 +45,8 @@ public interface LayerWithInput extends Layer {
     
     public void resetGradients ();
     
+    public void resetWeights ();
+    
     public void setParameters (LayerParameters parameters);
     
     public default void setInputLayer (LayerWithOutput layer) {

@@ -50,7 +50,7 @@ public class RnnDemo {
         
         Initializer initializer = new Initializer (new NormalInitialization (123456));
         
-        InputLayer                   layer0 = new InputLayerImpl (0, 4);
+        InputLayer                   layer0 = new InputLayerImpl (0, 256);
         FullyConnectedRecursiveLayer layer1 = new FullyConnectedRecursiveLayer (1, 3, new HyperbolicTangent());
         OutputLayer                  layer2 = new OutputLayerImpl (2, UdLanguage.size (), new Softmax ());
         
@@ -84,8 +84,8 @@ public class RnnDemo {
             for (byte byte8 : bytes) {
                 attributeSequence.add (ByteUtils.byteToOneHotVector (byte8));
             }
-            attributeSequence = new LinkedList <> ();
             
+            /*
             double[] e1 = new double [4];
             e1[0]=0.111;
             e1[1]=0.222;
@@ -98,14 +98,16 @@ public class RnnDemo {
             e2[2]=0.777;
             e2[3]=0.888;
             
+            attributeSequence = new LinkedList <> ();
             for (int i2 = 0; i2 < 10; i2++) {
-                if (i2 % 2 == 0) {
+                if (true || i2 % 2 == 0) {
                     attributeSequence.add (e1);
                 }
                 else {
                     attributeSequence.add (e2);
                 }
             }
+            */
             
             UdExample example = new UdExample (attributeSequence, UdLanguage.FRENCH);
             /*
