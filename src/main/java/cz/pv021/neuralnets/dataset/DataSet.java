@@ -19,6 +19,8 @@ public class DataSet <C extends DataClass, E extends SimpleExample <C>> {
     
     int numberOfAttributes;
     
+    final double roundBy = 1000.0;
+    
     public DataSet (List <E> examples, double splitFactor) {
         trainSet = new ArrayList<>();
         testSet = new ArrayList<>();
@@ -70,7 +72,7 @@ public class DataSet <C extends DataClass, E extends SimpleExample <C>> {
             for (int j = 0; j < totalExamples; j++) {
                 double oldValue = getExampleByIndex(j).getAttributes()[att];
                 double newValue = 2 * (oldValue - middle) / (max - min);
-                getExampleByIndex(j).getAttributes()[att] = newValue;
+                getExampleByIndex(j).getAttributes()[att] = Math.round(newValue*roundBy)/roundBy;
             }
         }
     }
@@ -95,7 +97,7 @@ public class DataSet <C extends DataClass, E extends SimpleExample <C>> {
             for (int j = 0; j < totalExamples; j++) {
                 double oldValue = getExampleByIndex(j).getAttributes()[att];
                 double newValue = (oldValue - min) / (max - min);
-                getExampleByIndex(j).getAttributes()[att] = newValue;
+                getExampleByIndex(j).getAttributes()[att] = Math.round(newValue*roundBy)/roundBy;
             }
         }
     }

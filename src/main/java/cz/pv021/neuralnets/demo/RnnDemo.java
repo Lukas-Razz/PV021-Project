@@ -9,6 +9,7 @@ import cz.pv021.neuralnets.functions.*;
 import cz.pv021.neuralnets.initialization.Initializer;
 import cz.pv021.neuralnets.initialization.NormalInitialization;
 import cz.pv021.neuralnets.network.RecurrentNetwork;
+import cz.pv021.neuralnets.optimizers.AdaGrad;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -42,20 +43,20 @@ public class RnnDemo {
     }
     
     private static void testSentences () throws IOException {
-        double learningRate = 0.1; // 0.01;
-        double momentum = 0.0;
+        double learningRate = 0.05; // 0.01;
+        double momentum = 0.5;
         double l1 = 0.00;
-        double l2 = 0.0001;
+        double l2 = 0.0000;
         int classes = UdLanguage.size ();
         
-        Cost cost = new Cost (new MeanSquaredError(), l1, l2);
-        Optimizer optimizer = new Optimizer (learningRate, new SGD(), momentum, l1, l2);
+        Cost cost = new Cost (new SquaredError(), l1, l2);
+        Optimizer optimizer = new Optimizer (learningRate, new AdaGrad(), momentum, l1, l2);
         
         Initializer initializer = new Initializer (new NormalInitialization (123456));
         
         final int INPUT_SIZE = 256;
         InputLayer  layer0 = new InputLayerImpl (0, INPUT_SIZE);
-        HiddenLayer layer1 = new FullyConnectedLayer (1, 16, new HyperbolicTangent ());
+        HiddenLayer layer1 = new FullyConnectedLayer (1, 5, new HyperbolicTangent ());
         OutputLayer layer2 = new OutputLayerImpl (2, classes, new Softmax ());
         
         RecurrentNetwork <InputLayer, OutputLayer> rnn = new RecurrentNetwork <> (
@@ -121,7 +122,7 @@ public class RnnDemo {
             UdExample example = new UdExample (attributeSequence, UdLanguage.FRENCH);
             
             // LEARNING.
-            final int unfoldedLayers = 3;
+            final int unfoldedLayers = 2;
             rnn.backpropagationThroughTime (
                 example.getAttributes (),
                 example.getExampleClass().getIndex (),
