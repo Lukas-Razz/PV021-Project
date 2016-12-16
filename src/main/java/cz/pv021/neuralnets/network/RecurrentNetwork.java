@@ -1,7 +1,6 @@
 package cz.pv021.neuralnets.network;
 
 import cz.pv021.neuralnets.error.Cost;
-import cz.pv021.neuralnets.layers.FullyConnectedRecursiveLayer;
 import cz.pv021.neuralnets.layers.FullyConnectedLayer;
 import cz.pv021.neuralnets.layers.HiddenLayer;
 import cz.pv021.neuralnets.layers.InputLayer;
@@ -43,9 +42,9 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
     private static final int INPUT_LAYER_ID_SHIFT = 1000;
     private static final int HIDDEN_LAYER_ID_SHIFT = 2000;
     private final IL originalInputLayer;
-    private final FullyConnectedRecursiveLayer originalHiddenLayer;
+    private final HiddenLayer originalHiddenLayer;
     
-    public RecurrentNetwork (IL inputLayer, FullyConnectedRecursiveLayer hiddenLayer, OL outputLayer, Cost cost, Optimizer optimizer) {
+    public RecurrentNetwork (IL inputLayer, HiddenLayer hiddenLayer, OL outputLayer, Cost cost, Optimizer optimizer) {
         super (
             Collections.singletonList (inputLayer),
             Collections.singletonList (hiddenLayer),
@@ -64,17 +63,15 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
     
     // a[t] is the input at time t.
     // y[t] is the output
-    public void backpropagationThroughTime (List <double[]> inputSequence, double expectedOutput) {   
-        int k = 3;
-        
+    public void backpropagationThroughTime (List <double[]> inputSequence, double expectedOutput, int k) {   
         int sequenceLength = inputSequence.size ();
         
-        // System.out.println ("Start: " + this);
+        // System.out.println ("BPTT start: " + this);
         
         // Unfold the network to contain k instances of f.
         this.unfold (k);
         
-        // System.out.println ("Unfolded: " + this);
+        // System.out.println ("BPTT unfolded: " + this);
         
         // t = time
         // n = the length of the training sequence
@@ -106,12 +103,12 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
         
         this.fold (k);
         
-        // System.out.println ("Folded: " + this);
+        // System.out.println ("BPTT folded: " + this);
     }
     
     // Let k layers collapse into a single recurent one.
     // See the class documentation.
-    private void fold (int k) {
+    public void fold (int k) {
         int i = 0;
         
         // Restore the original inputLayer.
@@ -161,13 +158,13 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
     
     // See the class documentation.
     // Also known as: unroll.
-    private void unfold (int k) {
+    public void unfold (int k) {
         int i = 0;
         
         List <HiddenLayer> hiddenLayers = this.getHiddenLayers ();
         HiddenLayer layer = hiddenLayers.get (i);
         if (! (layer instanceof RecurrentHiddenLayer)) {
-            throw new IllegalArgumentException ("Trying to unfold non-recurrent layer.");
+            // throw new IllegalArgumentException ("Trying to unfold non-recurrent layer.");
         }
         
         // Make k copies of the input layer.
@@ -182,7 +179,7 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
         }
         
         hiddenLayers.remove (i);
-        RecurrentHiddenLayer recurrentLayer = (RecurrentHiddenLayer) layer;
+        HiddenLayer recurrentLayer = layer;
         
         int layerSize = recurrentLayer.getNumberOfUnits ();
         FullyConnectedLayer zeroContextLayer = new FullyConnectedLayer (-1, layerSize, null); //IDčko
@@ -194,7 +191,7 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
             unfoldedLayerInputs.add (previousHiddenLayer);
             unfoldedLayerInputs.add (inputLayers.get (t));
             
-            HiddenLayer unfoldedLayer = recurrentLayer.makeNonRecurrentCopy (recurrentLayer.getId () + HIDDEN_LAYER_ID_SHIFT + t);
+            HiddenLayer unfoldedLayer = recurrentLayer.makeCopy (recurrentLayer.getId () + HIDDEN_LAYER_ID_SHIFT + t);
             Layers.connect (unfoldedLayerInputs, unfoldedLayer);
             hiddenLayers.add (i + t, unfoldedLayer);
             

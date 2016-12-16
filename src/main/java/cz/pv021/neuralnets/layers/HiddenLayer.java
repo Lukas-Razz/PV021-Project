@@ -8,8 +8,11 @@ import cz.pv021.neuralnets.functions.HiddenFunction;
  * 
  * @author  Josef Plch
  * @since   2016-11-07
- * @version 2016-12-14
+ * @version 2016-12-16
  */
 public interface HiddenLayer extends LayerWithInput, LayerWithOutput {
     public HiddenFunction getActivationFunction ();
+    
+    @Override
+    public HiddenLayer makeCopy (int id);
 }

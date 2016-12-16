@@ -10,7 +10,7 @@ import java.util.Arrays;
 public abstract class ByteUtils {
     public static double[] byteToOneHotVector (byte byte8) {
         double[] array = new double[256];
-        Arrays.fill (array, 0.0);
+        Arrays.fill (array, -1.0);
         int oneIndex = byteToInt (byte8);
         array[oneIndex] = 1;
         return array;

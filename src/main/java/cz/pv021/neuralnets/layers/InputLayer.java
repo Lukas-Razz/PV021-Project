@@ -8,6 +8,7 @@ package cz.pv021.neuralnets.layers;
  * @version 2016-12-15
  */
 public interface InputLayer extends LayerWithOutput {
+    @Override
     public InputLayer makeCopy (int id);
     
     public void setInput (double[] input);

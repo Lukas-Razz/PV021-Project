@@ -3,8 +3,9 @@ package cz.pv021.neuralnets.layers;
 /**
  * @author  Josef Plch
  * @since   2016-12-12
- * @version 2016-12-14
+ * @version 2016-12-16
  */
 public interface RecurrentHiddenLayer extends HiddenLayer {
-    public HiddenLayer makeNonRecurrentCopy (int id);
+    @Override
+    public RecurrentHiddenLayer makeCopy (int id);
 }

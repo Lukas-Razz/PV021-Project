@@ -5,7 +5,7 @@ package cz.pv021.neuralnets.layers;
  * 
  * @author  Josef Plch
  * @since   2016-11-08
- * @version 2016-12-13
+ * @version 2016-12-16
  */
 public interface LayerWithOutput extends Layer {
     /**
@@ -14,6 +14,14 @@ public interface LayerWithOutput extends Layer {
      * @return Output layer.
      */
     public LayerWithInput getOutputLayer ();
+    
+    /**
+     * Create a copy of this layer. Do not set input nor output layers.
+     * 
+     * @param id ID of the copy.
+     * @return Copy of this layer.
+     */
+    public LayerWithOutput makeCopy (int id);
     
     /**
      * Set the output (i.e. next) layer.

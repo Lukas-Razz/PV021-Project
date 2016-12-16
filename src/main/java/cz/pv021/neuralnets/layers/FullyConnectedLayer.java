@@ -2,17 +2,17 @@ package cz.pv021.neuralnets.layers;
 
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cz.pv021.neuralnets.functions.HiddenFunction;
+import java.util.Arrays;
 
 /**
- * @author  Lukáš Daubner
+ * @author  Lukáš Daubner, Josef Plch
  * @since   2016-10-30
- * @version 2016-12-15
+ * @version 2016-12-16
  */
 public class FullyConnectedLayer implements HiddenLayer {
     private final Logger logger = LoggerFactory.getLogger(FullyConnectedLayer.class);
@@ -45,7 +45,7 @@ public class FullyConnectedLayer implements HiddenLayer {
 
     @Override
     public void backwardPass () {
-        String logPrefix = "FCL #" + id + " / backwardPass: ";
+        String logPrefix = "HiddenLayer #" + id + " / backwardPass: ";
         // System.out.println (logPrefix + "innerPotentials = " + Arrays.toString (innerPotentials));
         
         // Error with respect to weight.
@@ -97,8 +97,8 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     @Override
-    public List<LayerParameters> getErrors () {
-        List<LayerParameters> errors = new ArrayList <> ();
+    public List <LayerParameters> getErrors () {
+        List <LayerParameters> errors = new ArrayList <> ();
         for (int i = 0; i < weightErrors.size (); i++) {
             errors.add (new LayerParameters (weightErrors.get(i), biasErrors.get(i), id));
         }
@@ -188,6 +188,19 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     @Override
+    public FullyConnectedLayer makeCopy (int id) {
+        FullyConnectedLayer copy = new FullyConnectedLayer (id, this.getNumberOfUnits (), this.getActivationFunction ());
+        copy.setBias            (this.bias);
+        copy.setBiasErrors      (this.biasErrors);
+        copy.setErrWrtInnerP    (this.err_wrt_innerP);
+        copy.setInnerPotentials (this.innerPotentials);
+        copy.setOutput          (this.output);
+        copy.setWeightErrors    (this.weightErrors);
+        copy.setWeights         (this.weights);
+        return copy;
+    }
+    
+    @Override
     public void resetGradients () {
         biasErrors.clear ();
         weightErrors.clear ();
@@ -212,10 +225,12 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     // Alias.
+    @Override
     public void setInnerPotentialGradient (double[] innerPotentialGradient) {
         this.setErrWrtInnerP (innerPotentialGradient);
     }
     
+    @Override
     public void setInnerPotentials (double[] innerPotentials) {
         this.innerPotentials = innerPotentials;
     }

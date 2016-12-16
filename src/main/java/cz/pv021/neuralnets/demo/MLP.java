@@ -1,7 +1,6 @@
 package cz.pv021.neuralnets.demo;
 
 import cz.pv021.neuralnets.dataset.DataSet;
-import cz.pv021.neuralnets.dataset.Example;
 import cz.pv021.neuralnets.dataset.iris.IrisReader;
 import cz.pv021.neuralnets.dataset.iris.IrisClass;
 import cz.pv021.neuralnets.dataset.iris.IrisExample;

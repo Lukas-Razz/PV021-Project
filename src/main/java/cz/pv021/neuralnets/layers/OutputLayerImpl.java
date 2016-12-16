@@ -4,7 +4,6 @@ import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.OutputFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author  Lukáš Daubner
  * @since   2016-10-30
- * @version 2016-12-15
+ * @version 2016-12-16
  */
 public class OutputLayerImpl implements OutputLayer {
     final Logger logger = LoggerFactory.getLogger(OutputLayerImpl.class);
@@ -27,9 +26,9 @@ public class OutputLayerImpl implements OutputLayer {
     private double[] bias;
     private final List<double[]> biasErrors;
     // Error with respect to inner potentials = inner potential gradient.
-    private final double[] err_wrt_innerP;
+    private double[] err_wrt_innerP;
     private double expectedOutput;
-    private final double[] innerPotentials;
+    private double[] innerPotentials;
     private final int numberOfUnits;
     private double[] output;
     private final List<double[][]> weightErrors;
@@ -82,6 +81,11 @@ public class OutputLayerImpl implements OutputLayer {
             }
         }
         this.output = outputFunction.apply (innerPotentials);
+    }
+    
+    @Override
+    public OutputFunction getActivationFunction () {
+        return outputFunction;
     }
     
     @Override
@@ -166,7 +170,17 @@ public class OutputLayerImpl implements OutputLayer {
     public void setExpectedOutput (double expectedOutput) {
         this.expectedOutput = expectedOutput;
     }
-
+    
+    @Override
+    public void setInnerPotentialGradient (double[] innerPotentialGradient) {
+        this.err_wrt_innerP = innerPotentialGradient;
+    }
+    
+    @Override
+    public void setInnerPotentials (double[] innerPotentials) {
+        this.innerPotentials = innerPotentials;
+    }
+    
     @Override
     public void setInputLayers (List <LayerWithOutput> layers) {
         this.inputMerger = new InputMerger (layers);
@@ -178,14 +192,14 @@ public class OutputLayerImpl implements OutputLayer {
     }
     
     @Override
-    public OutputFunction getActivationFunction() {
-        return outputFunction;
-    }
-    
-    @Override
     public void setParameters (LayerParameters parameters) {
         weights = parameters.getWeights();
         bias = parameters.getBias();
+    }
+    
+    @Override
+    public void setWeights (double[][] weights) {
+        this.weights = weights;
     }
     
     @Override

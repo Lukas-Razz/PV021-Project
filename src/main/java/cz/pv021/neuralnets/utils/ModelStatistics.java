@@ -7,12 +7,12 @@ import java.text.DecimalFormatSymbols;
 /**
  * @author  Josef Plch
  * @since   2016-12-13
- * @version 2016-12-13
+ * @version 2016-12-16
  */
 public abstract class ModelStatistics {
     private static final DecimalFormat DEFAULT_DECIMAL_FORMAT = createDefaultDecimalFormat ();
     
-    private static DecimalFormat createDefaultDecimalFormat () {
+    public static DecimalFormat createDefaultDecimalFormat () {
         DecimalFormat format = new DecimalFormat ("0.0");
         DecimalFormatSymbols formatSymbols = new  DecimalFormatSymbols ();
         formatSymbols.setDecimalSeparator ('.');
@@ -90,6 +90,22 @@ public abstract class ModelStatistics {
             result.append("\t").append (formatter.format (classRecall));
         }
         
+        return result.toString ();
+    }
+    
+    public static String show2dArray (double[][] array) {
+        return show2dArray (array, DEFAULT_DECIMAL_FORMAT);
+    }
+    
+    public static String show2dArray (double[][] array, DecimalFormat decimalFormat) {
+        StringBuilder result = new StringBuilder ();
+        for (double[] row : array) {
+            for (double x: row) {
+                result.append (decimalFormat.format (x));
+                result.append ('\t');
+            }
+            result.append ('\n');
+        }
         return result.toString ();
     }
 }
