@@ -11,7 +11,7 @@ Parameters are space-separated.
 Avaible functions:
   Optimization algorithms (optim):
     SDG - Stochastic Gradient Descend
-    AdaGrad - Adaptive Gradien
+    AdaGrad - Adaptive Gradient
     
   Loss functions (loss):
     SE - Squared Error
