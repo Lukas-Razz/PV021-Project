@@ -3,6 +3,7 @@ package cz.pv021.neuralnets.layers;
 import cz.pv021.neuralnets.error.Loss;
 import cz.pv021.neuralnets.functions.OutputFunction;
 import cz.pv021.neuralnets.utils.LayerParameters;
+import cz.pv021.neuralnets.utils.Round;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -33,6 +34,8 @@ public class OutputLayerImpl implements OutputLayer {
     private double[] output;
     private final List<double[][]> weightErrors;
     private double[][] weights;
+    
+    final double roundBy = 10000.0;
     
     public OutputLayerImpl (int id, int numberOfUnits, OutputFunction outputFunction) {
         this.id = id;
@@ -80,7 +83,8 @@ public class OutputLayerImpl implements OutputLayer {
                 innerPotentials[n] += input[i] * weights[n][i];
             }
         }
-        this.output = outputFunction.apply (innerPotentials);
+        //this.output = outputFunction.apply (innerPotentials);
+        this.output = Round.Round(outputFunction.apply (innerPotentials), roundBy);
     }
     
     @Override

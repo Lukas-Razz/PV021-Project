@@ -1,0 +1,1 @@
+Main-Class: cz.pv021.neuralnets.demo.Main_MLP_Language

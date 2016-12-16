@@ -1,5 +1,6 @@
 package cz.pv021.neuralnets.dataset;
 
+import cz.pv021.neuralnets.utils.Round;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ public class DataSet <C extends DataClass, E extends SimpleExample <C>> {
     List <E> testSet;
     
     int numberOfAttributes;
+    
+    final double roundBy = 1000.0;
     
     public DataSet (List <E> examples, double splitFactor) {
         trainSet = new ArrayList<>();
@@ -70,7 +73,7 @@ public class DataSet <C extends DataClass, E extends SimpleExample <C>> {
             for (int j = 0; j < totalExamples; j++) {
                 double oldValue = getExampleByIndex(j).getAttributes()[att];
                 double newValue = 2 * (oldValue - middle) / (max - min);
-                getExampleByIndex(j).getAttributes()[att] = newValue;
+                getExampleByIndex(j).getAttributes()[att] = Round.Round(newValue, roundBy);
             }
         }
     }
@@ -95,7 +98,7 @@ public class DataSet <C extends DataClass, E extends SimpleExample <C>> {
             for (int j = 0; j < totalExamples; j++) {
                 double oldValue = getExampleByIndex(j).getAttributes()[att];
                 double newValue = (oldValue - min) / (max - min);
-                getExampleByIndex(j).getAttributes()[att] = newValue;
+                getExampleByIndex(j).getAttributes()[att] = Round.Round(newValue, roundBy);
             }
         }
     }
