@@ -44,27 +44,29 @@ public class MLP_Language {
     }
     
     private static void run () throws IOException {
+        
         double learningRate = 0.001;
-        double momentum = 0.01;
-        double l1 = 0.00;
-        double l2 = 0.000;
+        double momentum = 0.03; //vysoké momentum škodí, i AdaGrad...ale to bude mít stejný důvod......max 0.1
+        double l1 = 0.00001;
+        double l2 = 0.002;
         
-        int bachSize = 1;
-        int epochs = 10;
+        int bachSize = 1; //batch mi NaNuje....možná chyba v implementaci
+        int epochs = 80;
         
-        Cost cost = new Cost (new RootMeanSquaredError(), l1, l2);
+        Cost cost = new Cost (new SquaredError(), l1, l2); //Jednoduchý error má lepší výsledky
         Optimizer optimizer = new Optimizer(learningRate, new SGD(), momentum, l1, l2);
         
         InputLayer  layer0 = new InputLayerImpl (0, 100);
-        HiddenLayer layer1a = new FullyConnectedLayer (1, 150, new HyperbolicTangent());
-        //HiddenLayer layer1b = new FullyConnectedLayer (2, 10, new HyperbolicTangent());
-        OutputLayer layer2  = new OutputLayerImpl (2, UdLanguage.size (), new Softmax ());
+        HiddenLayer layer1a = new FullyConnectedLayer (1, 72, new Softsign());
+        HiddenLayer layer1b = new FullyConnectedLayer (2, 36, new Softsign());
+        //HiddenLayer layer1c = new FullyConnectedLayer (3, 18, new HyperbolicTangent());
+        OutputLayer layer2  = new OutputLayerImpl (4, UdLanguage.size (), new Softmax ());
         
         Initializer initializer = new Initializer (new NormalInitialization (123456));
         
         MultilayerPerceptron <InputLayer, OutputLayer> mlp = new MultilayerPerceptron <> (
             Arrays.asList (layer0),
-            Arrays.asList (layer1a),
+            Arrays.asList (layer1a, layer1b),
             layer2,
             cost,
             optimizer
@@ -79,7 +81,7 @@ public class MLP_Language {
             }
         }
         
-        int minimalLength = 75; //Remove outliers
+        int minimalLength = 75; //Remove outliers .... 100 to jen zhoršovala
         int maximumLength = 100;
         List <UdSimpleExample> czExamples = parseLanguageFile("cs_sentences", UdLanguage.CZECH, minimalLength, maximumLength);
         List <UdSimpleExample> deExamples = parseLanguageFile("de_sentences", UdLanguage.GERMAN, minimalLength, maximumLength);

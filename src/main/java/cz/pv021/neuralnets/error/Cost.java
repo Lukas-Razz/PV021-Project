@@ -5,7 +5,6 @@ import cz.pv021.neuralnets.utils.OutputExample;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * 
