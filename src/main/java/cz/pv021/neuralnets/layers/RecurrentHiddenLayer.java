@@ -7,5 +7,5 @@ package cz.pv021.neuralnets.layers;
  */
 public interface RecurrentHiddenLayer extends HiddenLayer {
     @Override
-    public RecurrentHiddenLayer makeCopy (int id);
+    public RecurrentHiddenLayer deepCopy (int id);
 }

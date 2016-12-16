@@ -21,7 +21,7 @@ public interface LayerWithOutput extends Layer {
      * @param id ID of the copy.
      * @return Copy of this layer.
      */
-    public LayerWithOutput makeCopy (int id);
+    public LayerWithOutput deepCopy (int id);
     
     /**
      * Set the output (i.e. next) layer.

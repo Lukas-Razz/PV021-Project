@@ -100,6 +100,7 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
             // Compute the context for the next time-step.
             // x = f (x, a[t]);
         }
+        this.adaptWeights ();
         
         this.fold (k);
         
@@ -129,14 +130,17 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
         System.out.println ("Size (layer x input): " + layerSize + " x " + inputSize);
         
         // TODO: Update the other attributes.
+        double[] avgBias = new double[layerSize];
         double[] avgInnerPotentials = new double[layerSize];
         double[] avgInnerPotentialGradients = new double[layerSize];
         double[][] avgWeights = new double[layerSize][inputSize];
         for (HiddenLayer unfoldedLayer : unfoldedLayers) {
+            double[] bias = unfoldedLayer.getBias ();
             double[] innerPotentials = unfoldedLayer.getInnerPotentials ();
             double[] innerPotentialGradient = unfoldedLayer.getInnerPotentialGradient ();
             double[][] weights = unfoldedLayer.getWeights ();
             for (int i2 = 0; i2 < layerSize; i2++) {
+                avgBias[i2]                    += bias[i2] / k;
                 avgInnerPotentials[i2]         += innerPotentials[i2] / k;
                 avgInnerPotentialGradients[i2] += innerPotentialGradient[i2] / k;
                 for (int i3 = 0; i3 < inputSize; i3++) {
@@ -144,8 +148,9 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
                 }
             }
         }
-        originalHiddenLayer.setInnerPotentials (avgInnerPotentials);
-        originalHiddenLayer.setInnerPotentialGradient (avgInnerPotentialGradients);
+        originalHiddenLayer.setBias (avgBias);
+        // originalHiddenLayer.setInnerPotentials (avgInnerPotentials);
+        // originalHiddenLayer.setInnerPotentialGradient (avgInnerPotentialGradients);
         originalHiddenLayer.setWeights (avgWeights);
         
         hiddenLayers.clear ();
@@ -172,7 +177,7 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
         inputLayers.clear ();
         for (int t = 0; t < k; t++) {
             inputLayers.add (
-                (IL) originalInputLayer.makeCopy (
+                (IL) originalInputLayer.deepCopy (
                     originalInputLayer.getId () + INPUT_LAYER_ID_SHIFT + t
                 )
             );
@@ -191,7 +196,7 @@ public class RecurrentNetwork <IL extends InputLayer, OL extends OutputLayer> ex
             unfoldedLayerInputs.add (previousHiddenLayer);
             unfoldedLayerInputs.add (inputLayers.get (t));
             
-            HiddenLayer unfoldedLayer = recurrentLayer.makeCopy (recurrentLayer.getId () + HIDDEN_LAYER_ID_SHIFT + t);
+            HiddenLayer unfoldedLayer = recurrentLayer.deepCopy (recurrentLayer.getId () + HIDDEN_LAYER_ID_SHIFT + t);
             Layers.connect (unfoldedLayerInputs, unfoldedLayer);
             hiddenLayers.add (i + t, unfoldedLayer);
             

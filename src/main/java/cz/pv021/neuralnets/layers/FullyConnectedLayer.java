@@ -64,10 +64,22 @@ public class FullyConnectedLayer implements HiddenLayer {
             }
         }
         // System.out.println (logPrefix + "gradient = " + Arrays.toString (this.getInnerPotentialGradient ()));
-        biasErrors.add(err_wrt_innerP); // e_wrt_innerP = e_wrt_bias
-        weightErrors.add(e_wrt_weight);
+        biasErrors.add (err_wrt_innerP); // e_wrt_innerP = e_wrt_bias
+        weightErrors.add (e_wrt_weight);
     }
 
+    private static double[] copy1dArray (double[] array) {
+        return Arrays.copyOf (array, array.length);
+    }
+    
+    private static double[][] copy2dArray (double[][] array) {
+        double[][] copy = new double[array.length][array[0].length];
+        for (int i = 0; i < array.length; i++) {
+            copy[i] = copy1dArray (array[i]);
+        }
+        return copy;
+    }
+    
     @Override
     public void forwardPass () {
         String logPrefix = "FCL #" + id + " / forwardPass: ";
@@ -88,6 +100,7 @@ public class FullyConnectedLayer implements HiddenLayer {
         return activationFunction;
     }
     
+    @Override
     public double[] getBias () {
         return bias;
     }
@@ -188,15 +201,15 @@ public class FullyConnectedLayer implements HiddenLayer {
     }
     
     @Override
-    public FullyConnectedLayer makeCopy (int id) {
-        FullyConnectedLayer copy = new FullyConnectedLayer (id, this.getNumberOfUnits (), this.getActivationFunction ());
-        copy.setBias            (this.bias);
-        copy.setBiasErrors      (this.biasErrors);
-        copy.setErrWrtInnerP    (this.err_wrt_innerP);
-        copy.setInnerPotentials (this.innerPotentials);
-        copy.setOutput          (this.output);
-        copy.setWeightErrors    (this.weightErrors);
-        copy.setWeights         (this.weights);
+    public FullyConnectedLayer deepCopy (int id) {
+        FullyConnectedLayer copy = new FullyConnectedLayer (id, numberOfUnits, activationFunction);
+        copy.setBias            (copy1dArray (bias));
+        copy.setBiasErrors      (new ArrayList <> (this.biasErrors));
+        copy.setErrWrtInnerP    (copy1dArray (err_wrt_innerP));
+        copy.setInnerPotentials (copy1dArray (innerPotentials));
+        copy.setOutput          (copy1dArray (output));
+        copy.setWeightErrors    (new ArrayList <> (this.weightErrors));
+        copy.setWeights         (copy2dArray (weights));
         return copy;
     }
     
@@ -259,6 +272,7 @@ public class FullyConnectedLayer implements HiddenLayer {
         this.weightErrors = weightErrors;
     }
     
+    @Override
     public void setWeights (double[][] weights) {
         this.weights = weights;
     }

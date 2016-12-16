@@ -127,7 +127,6 @@ public class RnnDemo {
                 example.getExampleClass().getIndex (),
                 unfoldedLayers
             );
-            rnn.adaptWeights ();
             
             int classNumber = example.getExampleClass ().getIndex ();
             int predictedClassNumber = rnn.getOutputClassIndex ();

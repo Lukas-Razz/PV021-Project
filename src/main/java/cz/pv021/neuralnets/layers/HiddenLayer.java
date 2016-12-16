@@ -14,5 +14,5 @@ public interface HiddenLayer extends LayerWithInput, LayerWithOutput {
     public HiddenFunction getActivationFunction ();
     
     @Override
-    public HiddenLayer makeCopy (int id);
+    public HiddenLayer deepCopy (int id);
 }

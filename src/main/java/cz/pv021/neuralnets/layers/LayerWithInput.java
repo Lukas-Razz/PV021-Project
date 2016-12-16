@@ -22,6 +22,8 @@ public interface LayerWithInput extends Layer {
      */
     public void forwardPass ();
     
+    public double[] getBias ();
+    
     public List <LayerParameters> getErrors ();
     
     public double[] getInnerPotentials ();    
@@ -46,6 +48,8 @@ public interface LayerWithInput extends Layer {
     public void resetGradients ();
     
     public void resetWeights ();
+    
+    public void setBias (double[] bias);
     
     public void setInnerPotentials (double[] innerPotentials);    
     

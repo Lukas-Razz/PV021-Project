@@ -1,7 +1,6 @@
 package cz.pv021.neuralnets.network;
 
 import cz.pv021.neuralnets.error.Cost;
-import cz.pv021.neuralnets.initialization.Initialization;
 import cz.pv021.neuralnets.initialization.Initializer;
 import cz.pv021.neuralnets.layers.HiddenLayer;
 import cz.pv021.neuralnets.layers.InputLayer;
@@ -21,7 +20,7 @@ import java.util.ArrayList;
  * 
  * @author  Lukáš Daubner, Josef Plch
  * @since   2016-11-17
- * @version 2016-12-15
+ * @version 2016-12-16
  */
 public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer> implements Network {
     private final List <IL> inputLayers = new ArrayList <> ();
@@ -42,9 +41,9 @@ public class MultilayerPerceptron <IL extends InputLayer, OL extends OutputLayer
     
     private void adaptLayerWeights (LayerWithInput layer) {
         LayerParameters parameters = layer.getParameters ();
-        List<LayerParameters> gradients = layer.getErrors();
+        List<LayerParameters> gradients = layer.getErrors ();
         layer.setParameters (optimizer.changeParameters (parameters, gradients));
-        layer.resetGradients();
+        layer.resetGradients ();
     }
     
     public void adaptWeights () {

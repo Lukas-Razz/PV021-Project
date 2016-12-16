@@ -15,7 +15,7 @@ public class ByteInputLayer extends InputLayerImpl {
     }
     
     @Override
-    public ByteInputLayer makeCopy (int id) {
+    public ByteInputLayer deepCopy (int id) {
         return (new ByteInputLayer (id));
     }
     

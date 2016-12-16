@@ -44,7 +44,7 @@ public class InputLayerImpl implements InputLayer {
     }
     
     @Override
-    public InputLayerImpl makeCopy (int id) {
+    public InputLayerImpl deepCopy (int id) {
         return (new InputLayerImpl (id, numberOfUnits));
     }
     

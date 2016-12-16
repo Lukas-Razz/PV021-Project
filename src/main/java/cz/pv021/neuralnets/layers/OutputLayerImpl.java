@@ -89,6 +89,11 @@ public class OutputLayerImpl implements OutputLayer {
     }
     
     @Override
+    public double[] getBias () {
+        return bias;
+    }
+    
+    @Override
     public List <LayerParameters> getErrors () {
         List<LayerParameters> errors = new ArrayList<>();
         for(int i=0; i<weightErrors.size(); i++) {
@@ -164,6 +169,11 @@ public class OutputLayerImpl implements OutputLayer {
     @Override
     public void resetWeights () {
         this.weights = new double[numberOfUnits][inputMerger.getNumberOfUnits ()];
+    }
+    
+    @Override
+    public void setBias (double[] bias) {
+        this.bias = bias;
     }
     
     @Override
