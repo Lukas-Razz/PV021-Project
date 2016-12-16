@@ -116,6 +116,19 @@ public class Main_MLP_Language {
     
     private static void run () throws IOException {
         
+        LOGGER.info("HyperParameters");
+        LOGGER.info("learningRate:" + String.valueOf(learningRate));
+        LOGGER.info("momentum:" + String.valueOf(momentum));
+        LOGGER.info("l1:" + String.valueOf(l1));
+        LOGGER.info("l2:" + String.valueOf(l2));
+        LOGGER.info("batchSize:" + String.valueOf(batchSize));
+        LOGGER.info("epochs:" + String.valueOf(epochs));
+        LOGGER.info("loss:" + loss.toString());
+        LOGGER.info("optim:" + optim.toString());
+        LOGGER.info("init:" + init.toString());
+        LOGGER.info("sizes:" + Arrays.toString(sizes));
+        LOGGER.info("activ:" + Arrays.toString(activ));
+        
         Cost cost = new Cost (loss, l1, l2);
         Optimizer optimizer = new Optimizer(learningRate, optim, momentum, l1, l2);
         

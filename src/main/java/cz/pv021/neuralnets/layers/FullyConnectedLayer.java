@@ -221,7 +221,7 @@ public class FullyConnectedLayer implements HiddenLayer {
     
     @Override
     public void resetWeights () {
-        System.out.println ("RESETING WEIGHTS: " + inputMerger.getLayers().size() + " input layers, " + inputMerger.getNumberOfUnits () + " input neurons in total");
+        //System.out.println ("RESETING WEIGHTS: " + inputMerger.getLayers().size() + " input layers, " + inputMerger.getNumberOfUnits () + " input neurons in total");
         this.weights = new double[numberOfUnits][inputMerger.getNumberOfUnits ()];
     }
     
